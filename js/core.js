@@ -513,6 +513,7 @@ async function reloadAll(silent) {
   try {
     await loadCore();
     VIEWS[currentView] && VIEWS[currentView]();
+    loadNotifs(); // traz avisos e recados em destaque que chegaram com a tela aberta
     if (!silent) toast('Dados atualizados!', 'ok');
   } catch (err) { toast('Erro ao carregar: ' + err.message, 'err'); }
   btn.disabled = false;
