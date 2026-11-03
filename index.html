@@ -394,6 +394,9 @@
   .hj-row > a{ font-weight:600; color:var(--brand); text-decoration:none;}
   .hj-act{ flex-basis:100%; display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft);}
   .hj-right{ margin-left:auto; display:flex; gap:6px; align-items:center;}
+  /* Acompanhamento (só leitura): esconde o que altera dados; o banco também bloqueia */
+  body.so-leitura :is(#fx-new, #hj-new, .btn-new, [data-done], [data-adiar], [data-def], #pa-edit, #pa-copy, #pa-msg, #pa-del, #pv-movesel, [data-move], #pv-note, #pv-note-ok, #pv-prio, #nd-hosp-novo, #fx-msg, #fx-newcol, [data-rencol], [data-delcol], #dc-list input, #dc-all, #pj-save, #pj-clear){ display:none !important; }
+  body.so-leitura .kcard{ cursor:pointer; }
   /* tela larga: a lista vira colunas, para o Feito/Amanhã ficar perto do nome (sem largura máxima na página) */
   @media (min-width:1600px){ .hj-list{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 12px;} .hj-list > .hj-row{ margin-bottom:0;} }
   @media (min-width:2300px){ .hj-list{ grid-template-columns:repeat(3,minmax(0,1fr));} }
@@ -783,17 +786,17 @@
 
 <script>window.FLOW_DEMO = new URLSearchParams(location.search).has('demo');</script>
 <script>window.FLOW_FALHAS = []; window.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'SCRIPT') window.FLOW_FALHAS.push(String(t.src).split('/').pop().split('?')[0]); }, true);</script>
-<script src="config.js?v=20261029162621"></script>
-<script src="js/core.js?v=20261029162621"></script>
-<script src="js/hoje.js?v=20261029162621"></script>
-<script src="js/fluxo.js?v=20261029162621"></script>
-<script src="js/doctor.js?v=20261029162621"></script>
-<script src="js/rqe.js?v=20261029162621"></script>
-<script src="js/reports.js?v=20261029162621"></script>
-<script src="js/sugestoes.js?v=20261029162621"></script>
-<script src="js/admin.js?v=20261029162621"></script>
-<script src="js/acompanhante.js?v=20261029162621"></script>
-<script src="js/novidades.js?v=20261029162621"></script>
-<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261029162621"><\/script><script src="js/demo-tour.js?v=20261029162621"><\/script>');</script>
+<script src="config.js?v=20261103132828"></script>
+<script src="js/core.js?v=20261103132828"></script>
+<script src="js/hoje.js?v=20261103132828"></script>
+<script src="js/fluxo.js?v=20261103132828"></script>
+<script src="js/doctor.js?v=20261103132828"></script>
+<script src="js/rqe.js?v=20261103132828"></script>
+<script src="js/reports.js?v=20261103132828"></script>
+<script src="js/sugestoes.js?v=20261103132828"></script>
+<script src="js/admin.js?v=20261103132828"></script>
+<script src="js/acompanhante.js?v=20261103132828"></script>
+<script src="js/novidades.js?v=20261103132828"></script>
+<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261103132828"><\/script><script src="js/demo-tour.js?v=20261103132828"><\/script>');</script>
 </body>
 </html>

@@ -66,7 +66,7 @@ const STAGE_ALIASES = {
   'Documentação Pendente': 'documentacao_pendente', 'Em espera': 'aguardando_medico', 'Documentação Recebida - Enviar Email': 'aguardando_hospital',
   'Aguardando Retorno Hospital': 'aguardando_hospital',
 };
-const SETOR_USUARIO = { cadastro: 'Cadastro', escalas: 'Escalas', juridico: 'Jurídico', marketing: 'Marketing', diretoria: 'Diretoria' };
+const SETOR_USUARIO = { cadastro: 'Cadastro', escalas: 'Escalas', juridico: 'Jurídico', marketing: 'Marketing', diretoria: 'Diretoria', acompanhamento: 'Acompanhamento (só leitura)' };
 /** Parecer jurídico do cadastro — só quem é do setor Jurídico registra (o banco também bloqueia). */
 const PARECER_JUR = { aprovado: ['Aprovado', 'ok'], aprovado_restricao: ['Aprovado com restrição', 'warn'], nao_aprovado: ['Não aprovado', 'bad'] };
 function isJuridico() { return S.profile?.setor === 'juridico'; }
@@ -477,6 +477,8 @@ const VIEWS = {};
 const VIEW_TITLES = { hoje: 'Hoje', fluxo: 'Fluxo', medico: 'Médico', indicadores: 'Indicadores', sugestoes: 'Sugestões', rqe: 'RQE', relatorios: 'Relatórios', auditoria: 'Auditoria', usuarios: 'Administração' };
 /** Dica do "i" ao lado do título, por tela (sem dica, o "i" some). */
 /** Escalista (setor Escalas, sem ser administrador): cadastra, move só de Primeiro contato para Aguardando médico e edita só o que criou. O banco garante. */
+/** Acompanhamento (só leitura): vê tudo, exporta e manda sugestões; o banco bloqueia qualquer alteração. */
+function ehLeitura() { return !!(S.profile && S.profile.setor === 'acompanhamento' && !S.isAdmin); }
 function ehEscalista() { return !!(S.profile && S.profile.setor === 'escalas' && !S.isAdmin); }
 const VIEW_INFO = {
   hoje: 'Suas ações do dia, atrasadas primeiro. Feito registra o que foi feito e pede a próxima ação; Amanhã adia para o próximo dia útil.',
@@ -519,6 +521,7 @@ $('#btn-reload').onclick = () => reloadAll(false);
 
 async function startApp() {
   showOnly('app');
+  document.body.classList.toggle('so-leitura', ehLeitura());
   { const nm = S.profile.display_name || S.user.email || '';
     const pt = nm.replace(/@.*/, '').split(/[\s._-]+/).filter(Boolean);
     const chip = $('#who-chip');

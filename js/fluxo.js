@@ -581,7 +581,7 @@ function cardHtml(d) {
   const sla = FINAL_STAGES.includes(d.stage) ? null : doctorSla(d);
   const prog = S.docProgress[d.id] || 0;
   const t = (on, label) => `<span class="tag ${on ? 'on' : 'off'}">${label}</span>`;
-  return `<div class="kcard" draggable="true" data-id="${d.id}">
+  return `<div class="kcard" draggable="${ehLeitura() ? 'false' : 'true'}" data-id="${d.id}">
     <div class="top"><span class="sdot s-${sla ? sla.status : 'none'}"></span><span class="nm" title="${esc(d.name)}">${esc(d.name)}</span>${d.priority === 'urgente' ? '<span class="tagx bad">URG</span>' : d.priority === 'hospital_novo' ? '<span class="tagx warn">3h</span>' : ''}${parecerChip(d)}</div>
     <div class="kgrid"><span title="${esc((d.setores || []).join(', '))}">${esc((d.setores || []).join(', ') || '—')}</span><span title="${esc(d.hospital)}">${esc(d.hospital)}</span><span>${esc(d.crm || '—')}</span><span>${esc(d.whatsapp || '—')}</span></div>
     <div class="tags">${d.status_especialidade ? `<span class="tag">${esc(d.status_especialidade)}</span>` : ''}${d.disc ? `<span class="tag ${DISC_CLASS[d.disc]}">${esc(DISC_LABEL[d.disc])}</span>` : ''}${t(d.link_enviado, 'Link')}${t(d.app, 'APP')}${t(d.procuracao, 'Proc.')}</div>
@@ -659,6 +659,7 @@ function renderBoard(list) {
 /** Move o médico de etapa e registra no histórico (o banco gera as notificações). */
 async function moveDoctor(d, toStage) {
   const st = stageById(toStage);
+  if (ehLeitura()) { toast('Seu acesso é de acompanhamento (só leitura): dá para ver e exportar, mas não mover.', 'err'); return false; }
   if (ehEscalista() && !(d.stage === 'aguardando_contato' && toStage === 'aguardando_medico')) {
     toast('Escalista só pode mover de Primeiro contato para Aguardando médico. As outras etapas são com o Cadastro.', 'err');
     return false;

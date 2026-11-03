@@ -5,6 +5,7 @@ function afterDoctorChange() {
   if (currentView === 'fluxo') refreshFluxo(); else VIEWS[currentView] && VIEWS[currentView]();
 }
 function friendlyDbError(error, fallback) {
+  if (typeof ehLeitura === 'function' && ehLeitura()) return 'Seu acesso é de acompanhamento (só leitura): dá para ver e exportar, mas não alterar.';
   if (error?.code === '42501' && error.message && !/row-level security/i.test(error.message)) return error.message; // regras do banco (ex.: escalista) já vêm com o texto para a pessoa
   if (error?.code === '23505') return error.message?.includes('Duplicidade') ? error.message : 'Este médico já está cadastrado neste hospital.';
   return `${fallback}: ${error?.message || 'erro desconhecido'}`;

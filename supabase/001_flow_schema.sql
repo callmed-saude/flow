@@ -738,3 +738,24 @@ revoke all on function public.flow_doctors_escalista_guard() from public, anon, 
 drop trigger if exists flow_doctors_escalista on public.flow_doctors;
 create trigger flow_doctors_escalista before insert or update on public.flow_doctors
   for each row execute function public.flow_doctors_escalista_guard();
+
+-- ---------- migração 20 (03/11/2026): setor 'acompanhamento' só leitura (políticas restritivas em todas as tabelas de trabalho) ----------
+create or replace function public.flow_e_leitura() returns boolean
+ language sql stable security definer set search_path to 'public' as $$
+  select coalesce((select p.setor = 'acompanhamento' from public.flow_profiles p where p.user_id = auth.uid()), false)
+     and not public.flow_is_admin();
+$$;
+revoke all on function public.flow_e_leitura() from public, anon;
+grant execute on function public.flow_e_leitura() to authenticated;
+do $$
+declare t text;
+begin
+  foreach t in array array['flow_doctors','flow_activities','flow_doctor_documents','flow_hospital_pedidos','flow_rqe_requests','flow_rqe_documents','flow_tarefas'] loop
+    execute format('drop policy if exists %I on public.%I', t || '_leitura_ins', t);
+    execute format('drop policy if exists %I on public.%I', t || '_leitura_upd', t);
+    execute format('drop policy if exists %I on public.%I', t || '_leitura_del', t);
+    execute format('create policy %I on public.%I as restrictive for insert to authenticated with check (not public.flow_e_leitura())', t || '_leitura_ins', t);
+    execute format('create policy %I on public.%I as restrictive for update to authenticated using (not public.flow_e_leitura()) with check (not public.flow_e_leitura())', t || '_leitura_upd', t);
+    execute format('create policy %I on public.%I as restrictive for delete to authenticated using (not public.flow_e_leitura())', t || '_leitura_del', t);
+  end loop;
+end $$;
