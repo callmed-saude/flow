@@ -41,7 +41,7 @@ function perRange() {
 }
 function savePer() { try { localStorage.setItem('flow:periodo', JSON.stringify(FX.per)); } catch (_) { /* ignora */ } }
 Object.defineProperty(FX, 'gran', { get() { return FX.per.gran; }, configurable: true });
-try { FX.mode = localStorage.getItem('flow:mode') || 'jornada'; } catch (_) { /* ignora */ }
+try { FX.mode = localStorage.getItem('flow:mode') || 'kanban'; } catch (_) { /* ignora */ }
 const colLimit = {}; // etapa -> quantos cards mostrar no Kanban
 let STAGE_EV = null;  // histórico de etapas por médico (para a Jornada)
 

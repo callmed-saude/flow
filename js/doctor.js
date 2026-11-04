@@ -255,10 +255,10 @@ function drawMedico() {
         <div><b>Etapa atual:</b> <span class="op-dot" style="display:inline-block;background:${esc(st?.color || '#999')};margin:0 4px"></span>${esc(st?.label || d.stage)} · há ${diasEtapa} dia(s)
           ${sla ? ` · ${sla.status === 'urgent' ? '<span class="tagx bad">SLA vencido</span>' : `<span class="tagx ${sla.status === 'warning' ? 'warn' : ''}">SLA: ${fmtRemaining(sla.remaining)} restantes</span>`}` : ''}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-          ${ehEscalista() ? (d.stage === 'aguardando_contato' ? `<button class="btn btn-line btn-sm" data-move="aguardando_medico">Mover → ${esc(stageLabel('aguardando_medico'))}</button>` : '<span class="muted small">As próximas etapas são com o Cadastro.</span>') : `
-          ${next ? `<button class="btn btn-line btn-sm" data-move="${next.id}">Mover → ${esc(next.label)}</button>` : ''}
-          <select class="inp" id="pv-movesel" style="width:auto;padding:6px 8px;font-size:12.5px"><option value="">Mover para…</option>${S.stages.filter((s) => s.id !== d.stage && !FINAL_STAGES.includes(s.id)).map((s) => `<option value="${s.id}">${esc(s.label)}</option>`).join('')}</select>
-          ${d.stage !== 'aprovado' ? '<button class="btn btn-green btn-sm" data-move="aprovado">✓ Aprovar</button>' : ''}
+          ${ehEscalista() ? (d.stage === 'aguardando_contato' ? `<button class="btn btn-primary btn-sm" data-move="aguardando_medico">Avançar para ${esc(stageLabel('aguardando_medico'))} →</button>` : '<span class="muted small">As próximas etapas são com o Cadastro.</span>') : `
+          ${next ? `<button class="btn btn-primary btn-sm" data-move="${next.id}" title="Passa o médico para a próxima etapa">Avançar para ${esc(next.label)} →</button>` : ''}
+          <select class="inp" id="pv-movesel" style="width:auto;padding:6px 8px;font-size:12.5px"><option value="">Outra etapa…</option>${S.stages.filter((s) => s.id !== d.stage && !FINAL_STAGES.includes(s.id)).map((s) => `<option value="${s.id}">${esc(s.label)}</option>`).join('')}</select>
+          ${d.stage !== 'aprovado' ? `<button class="btn ${next ? 'btn-line' : 'btn-green'} btn-sm" data-move="aprovado">✓ Aprovar</button>` : ''}
           ${d.stage !== 'reprovado' ? '<button class="btn btn-danger btn-sm" data-move="reprovado">✗ Reprovar</button>' : ''}`}
         </div>
       </div>

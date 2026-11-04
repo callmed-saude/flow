@@ -4,6 +4,16 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
+    id: 11, data: '04/11', titulo: 'Menu mais curto e tela de Apresentação',
+    itens: [
+      ['Apresentação', 'Novo primeiro item do menu: o que é o Flow, quem faz o quê e o que estamos construindo. Quem entra pela primeira vez começa por ela.'],
+      ['Médicos', 'O antigo "Fluxo" agora se chama Médicos e é a tela de entrada, já no Kanban (quem usa a Jornada continua nela).'],
+      ['Relatórios num lugar só', 'Indicadores e Relatórios ficam juntos no botão Relatórios do menu.'],
+      ['"Avançar para…" na ficha', 'O botão azul passa o médico para a próxima etapa. As outras etapas ficam em "Outra etapa…".'],
+      ['Letras mais legíveis', 'Os textos claros ficaram mais escuros, para ler melhor.'],
+    ],
+  },
+  {
     id: 10, data: '04/11', titulo: 'Menos cliques no dia a dia',
     itens: [
       ['A ficha abre ao lado do Kanban', 'Clique no card: a ficha abre num painel à direita e o Kanban continua atrás, com seu filtro e na mesma posição. Feche com ✕, Esc ou clicando fora. Use "‹ anterior" e "próximo ›" para passar pelos médicos da mesma coluna.'],

@@ -13,6 +13,7 @@ const ICONS = {
   rqe: '<path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
   file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8M16 17H8M10 9H8"/>',
   history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
   idea: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/>',
   users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
@@ -474,7 +475,7 @@ function subscribeNotifs() {
 
 // ---------- navegação ----------
 const VIEWS = {};
-const VIEW_TITLES = { hoje: 'Hoje', fluxo: 'Fluxo', medico: 'Médico', indicadores: 'Indicadores', sugestoes: 'Sugestões', rqe: 'RQE', relatorios: 'Relatórios', auditoria: 'Auditoria', usuarios: 'Administração' };
+const VIEW_TITLES = { sobre: 'Apresentação', hoje: 'Hoje', fluxo: 'Médicos', medico: 'Médico', indicadores: 'Indicadores', sugestoes: 'Sugestões', rqe: 'RQE', relatorios: 'Relatórios', auditoria: 'Auditoria', usuarios: 'Administração' };
 /** Dica do "i" ao lado do título, por tela (sem dica, o "i" some). */
 /** Escalista (setor Escalas, sem ser administrador): cadastra, move só de Primeiro contato para Aguardando médico e edita só o que criou. O banco garante. */
 /** Acompanhamento (só leitura): vê tudo, exporta e manda sugestões; o banco bloqueia qualquer alteração. */
@@ -489,12 +490,12 @@ const VIEW_INFO = {
   sugestoes: 'Ideias, problemas e dúvidas sobre o sistema. Cada sugestão só aparece para quem a criou e para a gestão.',
   usuarios: 'Quem acessa o Flow, com qual papel, e a lista oficial de hospitais.',
 };
-const VIEW_SUBS = { hoje: 'O que fazer agora', fluxo: 'Credenciamento de médicos', indicadores: 'Funil, SLA e gargalos', rqe: 'Registro de especialista no CREMESP', relatorios: 'Conversão, tempo e produtividade', auditoria: 'Quem fez o quê, e quando', sugestoes: 'Ideias e problemas do sistema', usuarios: 'Usuários e hospitais' };
+const VIEW_SUBS = { sobre: 'Torre de Controle - CallMed · credenciamento de médicos', hoje: 'O que fazer agora', fluxo: 'Credenciamento de médicos', indicadores: 'Funil, SLA e gargalos', rqe: 'Registro de especialista no CREMESP', relatorios: 'Conversão, tempo e produtividade', auditoria: 'Quem fez o quê, e quando', sugestoes: 'Ideias e problemas do sistema', usuarios: 'Usuários e hospitais' };
 let currentView = 'fluxo';
 function go(view) {
   if (typeof PV !== 'undefined' && PV.gaveta && view !== 'medico') fecharGaveta(true); // trocar de tela fecha o painel da ficha
   currentView = view;
-  const railOf = { medico: 'fluxo', auditoria: 'usuarios', rqe: 'usuarios' };
+  const railOf = { medico: 'fluxo', auditoria: 'usuarios', rqe: 'usuarios', relatorios: 'indicadores' };
   $$('#rail .nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === (railOf[view] || view)));
   $$('.view').forEach((v) => v.classList.toggle('active', v.id === 'view-' + view));
   $('#hdr-title').textContent = VIEW_TITLES[view];
@@ -543,10 +544,12 @@ async function startApp() {
   $('#btn-backup').hidden = !S.isAdmin;
   loadNotifs();
   subscribeNotifs();
-  let v = 'hoje';
-  try { v = localStorage.getItem('flow:view2') || 'hoje'; } catch (_) { /* ignora */ }
-  if ((['usuarios', 'auditoria', 'rqe'].includes(v) && !S.isAdmin) || v === 'medico') v = 'hoje';
-  go(VIEWS[v] ? v : 'hoje');
+  // quem nunca viu a Apresentação entra por ela; os demais voltam para a última tela (padrão: Médicos, no Kanban)
+  let v = 'fluxo', viu = true;
+  try { v = localStorage.getItem('flow:view2') || 'fluxo'; viu = !!localStorage.getItem(chaveSobre()); } catch (_) { /* ignora */ }
+  if ((['usuarios', 'auditoria', 'rqe'].includes(v) && !S.isAdmin) || v === 'medico') v = 'fluxo';
+  if (!viu && !window.FLOW_DEMO) v = 'sobre';
+  go(VIEWS[v] ? v : 'fluxo');
   if (typeof Novidades !== 'undefined') Novidades.checar();
   if (typeof sgRetornoCarrega === 'function') { sgRetornoCarrega(); if (!S.sgTimer) S.sgTimer = setInterval(sgRetornoCarrega, 5 * 60000); } // respostas às sugestões de quem está logado
   // atualização automática a cada 5 min com a aba visível

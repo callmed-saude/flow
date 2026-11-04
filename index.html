@@ -15,7 +15,7 @@
     --f-ui:'Geist',-apple-system,'Segoe UI',system-ui,sans-serif; --f-mono:'Geist Mono',ui-monospace,monospace;
     --bg:#f7f7f8; --surface:#ffffff; --surface-2:#fafafb; --surface-3:#f3f3f5;
     --border:#e5e5ea; --border-soft:#efeff2; --border-strong:#d4d4db;
-    --ink:#17171c; --ink-soft:#56565f; --ink-faint:#9b9ba6;
+    --ink:#17171c; --ink-soft:#56565f; --ink-faint:#6b6b76;
     --brand:#1029e8; --brand-hover:#0a1db8; --brand-soft:#f0f2ff; --brand-line:#d9ddff;
     --teal:#38e3bf; --teal-deep:#0b8a71; --teal-soft:#e9f8f4;
     --amber:#b86e00; --amber-ink:#8a5200; --amber-soft:#fcf5e8; --amber-line:#f1ddb6;
@@ -768,17 +768,19 @@
   </header>
 
   <nav id="rail">
-    <button class="nav-btn active" data-view="hoje" title="Hoje: o que preciso fazer" style="position:relative"><i data-ic="hoje" data-size="19"></i><span>Hoje</span><span class="badge-dot" id="rail-hoje-n" hidden></span></button>
-    <button class="nav-btn" data-view="fluxo" title="Jornada e Kanban dos cadastros"><i data-ic="fluxo" data-size="19"></i><span>Fluxo</span></button>
-    <button class="nav-btn" data-view="indicadores" title="Indicadores do funil e do SLA"><i data-ic="chart" data-size="19"></i><span>Indicadores</span></button>
+    <button class="nav-btn" data-view="sobre" title="O que é o Flow e como a equipe usa"><i data-ic="info" data-size="19"></i><span>Apresentação</span></button>
+    <button class="nav-btn" data-view="fluxo" title="Kanban e Jornada dos médicos em credenciamento"><i data-ic="fluxo" data-size="19"></i><span>Médicos</span></button>
+    <button class="nav-btn" data-view="hoje" title="Hoje: o que preciso fazer" style="position:relative"><i data-ic="hoje" data-size="19"></i><span>Hoje</span><span class="badge-dot" id="rail-hoje-n" hidden></span></button>
+    <button class="nav-btn" data-view="indicadores" title="Indicadores do funil e relatórios com exportação"><i data-ic="chart" data-size="19"></i><span>Relatórios</span></button>
     <button class="nav-btn" data-view="rqe" title="Solicitações de RQE" hidden><i data-ic="rqe" data-size="19"></i><span>RQE</span></button>
-    <button class="nav-btn" data-view="relatorios" title="Relatórios e exportação para auditoria"><i data-ic="file" data-size="19"></i><span>Relatórios</span></button>
+    <button class="nav-btn" data-view="relatorios" title="Relatórios e exportação para auditoria" hidden><i data-ic="file" data-size="19"></i><span>Relatórios</span></button>
     <button class="nav-btn" data-view="auditoria" title="Quem fez o quê, e quando" hidden><i data-ic="history" data-size="19"></i><span>Auditoria</span></button>
     <button class="nav-btn" data-view="sugestoes" title="Sugestões de melhoria do sistema"><i data-ic="idea" data-size="19"></i><span>Sugestões</span></button>
     <button class="nav-btn" data-view="usuarios" title="Usuários, hospitais e migração" id="rail-usuarios" hidden><i data-ic="users" data-size="19"></i><span>Admin</span></button>
   </nav>
 
   <div class="view-container">
+    <section id="view-sobre" class="view pgview"></section>
     <section id="view-hoje" class="view pgview active"></section>
     <section id="view-fluxo" class="view"></section>
     <section id="view-medico" class="view"></section>
@@ -796,17 +798,18 @@
 
 <script>window.FLOW_DEMO = new URLSearchParams(location.search).has('demo');</script>
 <script>window.FLOW_FALHAS = []; window.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'SCRIPT') window.FLOW_FALHAS.push(String(t.src).split('/').pop().split('?')[0]); }, true);</script>
-<script src="config.js?v=20261104203228"></script>
-<script src="js/core.js?v=20261104203228"></script>
-<script src="js/hoje.js?v=20261104203228"></script>
-<script src="js/fluxo.js?v=20261104203228"></script>
-<script src="js/doctor.js?v=20261104203228"></script>
-<script src="js/rqe.js?v=20261104203228"></script>
-<script src="js/reports.js?v=20261104203228"></script>
-<script src="js/sugestoes.js?v=20261104203228"></script>
-<script src="js/admin.js?v=20261104203228"></script>
-<script src="js/acompanhante.js?v=20261104203228"></script>
-<script src="js/novidades.js?v=20261104203228"></script>
-<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261104203228"><\/script><script src="js/demo-tour.js?v=20261104203228"><\/script>');</script>
+<script src="config.js?v=20261104204235"></script>
+<script src="js/core.js?v=20261104204235"></script>
+<script src="js/hoje.js?v=20261104204235"></script>
+<script src="js/fluxo.js?v=20261104204235"></script>
+<script src="js/doctor.js?v=20261104204235"></script>
+<script src="js/rqe.js?v=20261104204235"></script>
+<script src="js/reports.js?v=20261104204235"></script>
+<script src="js/sugestoes.js?v=20261104204235"></script>
+<script src="js/admin.js?v=20261104204235"></script>
+<script src="js/acompanhante.js?v=20261104204235"></script>
+<script src="js/apresentacao.js?v=20261104204235"></script>
+<script src="js/novidades.js?v=20261104204235"></script>
+<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261104204235"><\/script><script src="js/demo-tour.js?v=20261104204235"><\/script>');</script>
 </body>
 </html>
