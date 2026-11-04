@@ -195,7 +195,7 @@ const Ditado = {
   if (typeof _toast === 'function') {
     window.toast = function (msg, kind, title) {
       try {
-        const m = String(msg || ''), erro = kind === 'err' || RE_ERRO.test(m);
+        const m = String(msg || ''), erro = kind === 'err' || (!kind && !title && RE_ERRO.test(m)); // aviso de sucesso ou notificação (com título) nunca é recusa
         uso('aviso', mascarar(m), { erro });
         if (erro) duvida('recusa');
         else if (/salv|criad|registrad|atualizad|adicionad|replicad|cadastro/i.test(m)) ultimoSalvo = Date.now();
