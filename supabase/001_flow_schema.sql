@@ -759,3 +759,15 @@ begin
     execute format('create policy %I on public.%I as restrictive for delete to authenticated using (not public.flow_e_leitura())', t || '_leitura_del', t);
   end loop;
 end $$;
+
+-- ---------- migração 21 (04/11/2026): arquivos das Sugestões seguem a regra da tabela (conselho de segurança) ----------
+-- áudio e prints só abrem para a gestão ou para quem enxerga a sugestão (o autor); antes qualquer membro abria todos
+drop policy if exists flow_docs_sel on storage.objects;
+create policy flow_docs_sel on storage.objects for select to authenticated using (
+  bucket_id = 'flow-docs' and public.flow_is_member() and (
+    public.flow_is_admin()
+    or exists (select 1 from public.flow_sugestoes s
+               where s.audio_path = storage.objects.name
+                  or coalesce(s.anexos, '[]'::jsonb) @> jsonb_build_array(jsonb_build_object('path', storage.objects.name)))));
+-- flow_sugestao_retorno passou a exigir flow_is_member() (usuário desativado não mexe mais na própria sugestão)
+-- obs.: o setor acompanhamento continua podendo subir arquivo, porque manda print e áudio nas Sugestões
