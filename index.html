@@ -351,6 +351,11 @@
 
   /* página do médico (igual à ficha de pessoa do Aliança) */
   #view-medico.active{ display:block; overflow-y:auto; padding:20px 28px;}
+  /* ficha em painel lateral sobre o Kanban/Hoje (largura proporcional à tela, sem largura máxima fixa) */
+  #view-medico.gaveta{ position:fixed; top:56px; right:0; left:auto; bottom:0; inset-inline-start:auto; width:max(720px, 62vw); max-width:100vw; z-index:61; background:var(--bg); border-left:1px solid var(--border); box-shadow:-18px 0 40px -18px rgba(16,16,24,.35); animation:gaveta .16s ease-out;}
+  @keyframes gaveta{ from{ transform:translateX(24px); opacity:.6;} to{ transform:none; opacity:1;} }
+  #pv-fundo{ position:fixed; inset:56px 0 0 0; z-index:60; background:rgba(16,16,24,.18);}
+  .pv-nav{ display:inline-flex; gap:4px; align-items:center;} .pv-nav button[disabled]{ opacity:.35; cursor:default;}
   .person-header{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:6px; padding-bottom:6px;}
   .person-header h2{ font-size:1.5rem;}
   .person-header .tags{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;}
@@ -394,6 +399,9 @@
   .hj-row > a{ font-weight:600; color:var(--brand); text-decoration:none;}
   .hj-act{ flex-basis:100%; display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft);}
   .hj-right{ margin-left:auto; display:flex; gap:6px; align-items:center;}
+  .hosp-chips{ display:inline-flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .hosp-chip{ border:1px solid var(--border); background:var(--surface); color:var(--ink-soft); border-radius:999px; padding:5px 11px; font:500 12px var(--f-ui); cursor:pointer; white-space:nowrap;}
+  .hosp-chip:hover{ border-color:var(--border-strong, #b9bccb); color:var(--ink);} .hosp-chip.on{ background:var(--brand-soft); border-color:var(--brand); color:var(--brand); font-weight:600;}
   /* Acompanhamento (só leitura): esconde o que altera dados; o banco também bloqueia */
   body.so-leitura :is(#fx-new, #hj-new, .btn-new, [data-done], [data-adiar], [data-def], #pa-edit, #pa-copy, #pa-msg, #pa-del, #pv-movesel, [data-move], #pv-note, #pv-note-ok, #pv-prio, #nd-hosp-novo, #fx-msg, #fx-newcol, [data-rencol], [data-delcol], #dc-list input, #dc-all, #pj-save, #pj-clear){ display:none !important; }
   body.so-leitura .kcard{ cursor:pointer; }
@@ -786,17 +794,17 @@
 
 <script>window.FLOW_DEMO = new URLSearchParams(location.search).has('demo');</script>
 <script>window.FLOW_FALHAS = []; window.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'SCRIPT') window.FLOW_FALHAS.push(String(t.src).split('/').pop().split('?')[0]); }, true);</script>
-<script src="config.js?v=20261104201520"></script>
-<script src="js/core.js?v=20261104201520"></script>
-<script src="js/hoje.js?v=20261104201520"></script>
-<script src="js/fluxo.js?v=20261104201520"></script>
-<script src="js/doctor.js?v=20261104201520"></script>
-<script src="js/rqe.js?v=20261104201520"></script>
-<script src="js/reports.js?v=20261104201520"></script>
-<script src="js/sugestoes.js?v=20261104201520"></script>
-<script src="js/admin.js?v=20261104201520"></script>
-<script src="js/acompanhante.js?v=20261104201520"></script>
-<script src="js/novidades.js?v=20261104201520"></script>
-<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261104201520"><\/script><script src="js/demo-tour.js?v=20261104201520"><\/script>');</script>
+<script src="config.js?v=20261104202302"></script>
+<script src="js/core.js?v=20261104202302"></script>
+<script src="js/hoje.js?v=20261104202302"></script>
+<script src="js/fluxo.js?v=20261104202302"></script>
+<script src="js/doctor.js?v=20261104202302"></script>
+<script src="js/rqe.js?v=20261104202302"></script>
+<script src="js/reports.js?v=20261104202302"></script>
+<script src="js/sugestoes.js?v=20261104202302"></script>
+<script src="js/admin.js?v=20261104202302"></script>
+<script src="js/acompanhante.js?v=20261104202302"></script>
+<script src="js/novidades.js?v=20261104202302"></script>
+<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261104202302"><\/script><script src="js/demo-tour.js?v=20261104202302"><\/script>');</script>
 </body>
 </html>

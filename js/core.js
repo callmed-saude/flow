@@ -492,6 +492,7 @@ const VIEW_INFO = {
 const VIEW_SUBS = { hoje: 'O que fazer agora', fluxo: 'Credenciamento de médicos', indicadores: 'Funil, SLA e gargalos', rqe: 'Registro de especialista no CREMESP', relatorios: 'Conversão, tempo e produtividade', auditoria: 'Quem fez o quê, e quando', sugestoes: 'Ideias e problemas do sistema', usuarios: 'Usuários e hospitais' };
 let currentView = 'fluxo';
 function go(view) {
+  if (typeof PV !== 'undefined' && PV.gaveta && view !== 'medico') fecharGaveta(true); // trocar de tela fecha o painel da ficha
   currentView = view;
   const railOf = { medico: 'fluxo', auditoria: 'usuarios', rqe: 'usuarios' };
   $$('#rail .nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === (railOf[view] || view)));

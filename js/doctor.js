@@ -33,6 +33,7 @@ function openNewDoctor() {
         <div class="field"><label>WhatsApp *</label><input class="inp" id="nd-wa" placeholder="(11) 99999-9999"></div>
         <div class="field" style="display:grid;grid-template-columns:1fr 70px;gap:6px"><div class="field" style="margin:0"><label>CRM (número)</label><input class="inp" id="nd-crm" placeholder="123456"></div><div class="field" style="margin:0"><label>UF</label><input class="inp" id="nd-uf" value="SP" maxlength="2"></div></div>
         <div class="field full"><label>Hospitais * <span class="muted">(1 cadastro por hospital)</span></label><div class="checks" id="nd-hosps"></div><a href="#" id="nd-hosp-novo" class="small" style="margin-top:6px;color:var(--brand);font-weight:500">Hospital não está na lista?</a></div>
+        <label class="field full nd-falei" style="display:flex;gap:8px;align-items:center;flex-direction:row;font-size:13px"><input type="checkbox" id="nd-falei"> <span><b>Já falei com o médico</b>: entra direto em "Aguardando médico", com a ação "Cobrar retorno do médico"</span></label>
         <div class="full" id="nd-conflicts"></div>
         <div class="field full"><label>Setor *</label><div class="checks" id="nd-setores">${SETORES.map((s) => `<label><input type="checkbox" value="${esc(s)}"> ${esc(s)}</label>`).join('')}</div></div>
         <div class="field"><label>Status especialidade</label><select class="inp" id="nd-status"><option value="">Selecione</option>${STATUS_ESP.map((s) => `<option>${s}</option>`).join('')}</select></div>
@@ -106,6 +107,7 @@ function openNewDoctor() {
   $('#nd-crm', el).addEventListener('input', render);
   render();
   $('#nd-hosp-novo', el).onclick = (e) => { e.preventDefault(); hospitalNovoDialog({ onCriado: (nome) => { hospSel.add(nome); render(); } }); };
+  try { $('#nd-falei', el).checked = localStorage.getItem('flow:jafalei') === '1'; } catch (_) { /* ignora */ } // lembra a última escolha
 
   $('#nd-ok', el).onclick = async () => {
     const btn = $('#nd-ok', el);
@@ -124,6 +126,8 @@ function openNewDoctor() {
     };
     try { if (S.profile?.setor !== 'cadastro') localStorage.setItem('flow:handoff', base.proximo_responsavel_id); } catch (_) { /* ignora */ }
     let created = 0, failed = 0;
+    const jaFalei = $('#nd-falei', el).checked;
+    try { localStorage.setItem('flow:jafalei', jaFalei ? '1' : '0'); } catch (_) { /* ignora */ }
     for (const h of hospSel) {
       if (conf[h]) {
         await sb.from('flow_activities').insert({ doctor_id: conf[h].d.id, type: 'note', description: `Tentativa de novo cadastro bloqueada — duplicidade por ${conf[h].by}. Motivo: ${reasons[h].trim()}` });
@@ -134,6 +138,13 @@ function openNewDoctor() {
       S.doctors.unshift(data);
       S.docProgress[data.id] = 0;
       await sb.from('flow_activities').insert({ doctor_id: data.id, type: 'stage_change', description: 'Cadastro criado no sistema' });
+      if (jaFalei) {
+        // "Já falei com o médico": o mesmo que cadastrar e depois Mover → Aguardando médico (o escalista pode fazer esse passo)
+        const st = stageById('aguardando_medico');
+        const patch = { stage: 'aguardando_medico', stage_entered_at: new Date().toISOString(), sla_hours: st?.sla_hours ?? 24, proxima_acao: ACAO_POR_ETAPA.aguardando_medico, proxima_data: addBusinessDays(1) };
+        const { error: e2 } = await sb.from('flow_doctors').update(patch).eq('id', data.id);
+        if (!e2) { Object.assign(data, patch); await sb.from('flow_activities').insert({ doctor_id: data.id, type: 'stage_change', description: `Movido para ${st?.label || 'Aguardando médico'}` }); }
+      }
       created++;
     }
     if (created) toast(base.proximo_responsavel_id === S.user.id ? `${created} cadastro(s) criado(s)!` : `${created} cadastro(s) criado(s) e encaminhado(s) para ${respName(base.proximo_responsavel_id)}`, 'ok');
@@ -145,6 +156,10 @@ function openNewDoctor() {
 // ---------- ficha do médico (página inteira, igual à ficha de pessoa do Aliança) ----------
 const PV = { doctor: null, tab: 'resumo', acts: [], docs: [], back: 'fluxo' };
 
+// A ficha abre como painel lateral sobre a tela de origem (Kanban, Hoje...), sem perder filtro e rolagem.
+// No celular (tela estreita) continua em tela cheia. Pedido a partir dos cliques de 03-04/11: 58 aberturas e 48 "voltar".
+const GAVETA_DE = ['fluxo', 'hoje', 'indicadores', 'relatorios'];
+const gavetaCabe = () => (window.innerWidth || document.documentElement.clientWidth || 1024) >= 900;
 async function openDoctor(d) {
   if (!d) return;
   if (currentView !== 'medico') PV.back = currentView;
@@ -152,9 +167,35 @@ async function openDoctor(d) {
   PV.doctor = d;
   PV.acts = []; PV.docs = [];
   $$('.modal-bg').forEach((m) => m.remove());
-  go('medico');
+  if (PV.gaveta || (GAVETA_DE.includes(currentView) && gavetaCabe())) abrirGaveta();
+  else go('medico');
   await loadDoctorDetail();
   drawMedico();
+}
+function abrirGaveta() {
+  const v = $('#view-medico');
+  if (!PV.gaveta) {
+    PV.gaveta = true;
+    v.classList.add('active', 'gaveta');
+    document.body.classList.add('com-gaveta');
+    let f = $('#pv-fundo'); if (!f) { f = document.createElement('div'); f.id = 'pv-fundo'; document.body.appendChild(f); f.onclick = () => fecharGaveta(); }
+    f.hidden = false;
+  }
+  v.scrollTop = 0;
+}
+function fecharGaveta(semAtualizar) {
+  if (!PV.gaveta) return;
+  PV.gaveta = false;
+  const v = $('#view-medico'); v.classList.remove('active', 'gaveta');
+  document.body.classList.remove('com-gaveta');
+  const f = $('#pv-fundo'); if (f) f.hidden = true;
+  PV.doctor = null; // a tela de trás já foi atualizada a cada mudança (afterDoctorChange): fechar não redesenha, e a rolagem fica onde estava
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && PV.gaveta && !document.querySelector('.modal-bg') && !document.querySelector('#ac-ed, #ac-sel')) fecharGaveta(); });
+/** Médicos vizinhos na mesma coluna (mesma etapa, mesmo filtro da tela de origem) para o "anterior / próximo". */
+function vizinhosNaColuna(d) {
+  const base = (currentView === 'fluxo' && typeof filteredDoctors === 'function') ? filteredDoctors() : S.doctors;
+  return base.filter((x) => x.stage === d.stage);
 }
 async function loadDoctorDetail() {
   const d = PV.doctor;
@@ -181,7 +222,7 @@ function drawMedico() {
   const TABS = [['resumo', 'Resumo'], ['docs', `Documentos · ${S.docProgress[d.id] || 0}%`], ['historico', `Histórico · ${PV.acts.length}`]];
   root.innerHTML = `
     <div class="person-header"><div style="flex:1;min-width:0">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn-ghost" id="pv-back">← ${esc(VIEW_TITLES[PV.back] || 'Fluxo')}</button><h2 style="margin:0">${esc(d.name)}</h2></div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${PV.gaveta ? `<span class="pv-nav"><button class="btn-ghost" id="pv-fechar" title="Fechar (Esc)">✕ Fechar</button><button class="btn-ghost" id="pv-ant" title="Médico anterior desta coluna">‹ anterior</button><button class="btn-ghost" id="pv-prox" title="Próximo médico desta coluna">próximo ›</button></span>` : `<button class="btn-ghost" id="pv-back">← ${esc(VIEW_TITLES[PV.back] || 'Fluxo')}</button>`}<h2 style="margin:0">${esc(d.name)}</h2></div>
       <div class="tags">
         <span class="ptag brand">${esc(d.hospital)}</span>
         ${d.crm ? `<span class="ptag">${esc(d.crm)}</span>` : ''}
@@ -214,7 +255,15 @@ function drawMedico() {
     <div class="pv-tabs">${TABS.map(([k, l]) => `<button class="pv-tab ${PV.tab === k ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('')}</div>
     <div id="pv-body"></div>`;
 
-  $('#pv-back').onclick = () => go(PV.back || 'fluxo');
+  if ($('#pv-back')) $('#pv-back').onclick = () => go(PV.back || 'fluxo');
+  if (PV.gaveta) {
+    $('#pv-fechar').onclick = () => fecharGaveta();
+    const viz = vizinhosNaColuna(d), i = viz.findIndex((x) => x.id === d.id);
+    const ant = i > 0 ? viz[i - 1] : null, prox = i >= 0 && i < viz.length - 1 ? viz[i + 1] : null;
+    $('#pv-ant').disabled = !ant; $('#pv-prox').disabled = !prox;
+    if (ant) $('#pv-ant').onclick = () => openDoctor(ant);
+    if (prox) $('#pv-prox').onclick = () => openDoctor(prox);
+  }
   $$('.pv-tab', root).forEach((b) => b.onclick = () => { PV.tab = b.dataset.tab; drawMedico(); });
   $('#pv-prio').onclick = async () => {
     const np = d.priority === 'urgente' ? 'rotina' : 'urgente';
@@ -472,6 +521,7 @@ async function deleteDoctor(d) {
   if (!count) return toast('Você não tem permissão para excluir este médico.', 'err');
   S.doctors = S.doctors.filter((x) => x.id !== d.id);
   toast('Médico excluído com sucesso!', 'ok');
+  if (PV.gaveta) { fecharGaveta(); return; }
   PV.doctor = null; go(PV.back && PV.back !== 'medico' ? PV.back : 'fluxo');
 }
 

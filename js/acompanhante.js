@@ -88,7 +88,7 @@ const Ditado = {
   function rotaAtual() {
     const app = document.getElementById('app');
     if (!app || !app.classList.contains('active')) return '/login';
-    const v = typeof currentView !== 'undefined' ? currentView : 'hoje';
+    const v = typeof PV !== 'undefined' && PV.gaveta ? 'medico' : (typeof currentView !== 'undefined' ? currentView : 'hoje'); // painel da ficha conta como a tela da ficha
     let sub = '';
     try {
       if (v === 'fluxo') sub = '/' + FX.mode;

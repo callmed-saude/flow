@@ -4,6 +4,14 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
+    id: 10, data: '04/11', titulo: 'Menos cliques no dia a dia',
+    itens: [
+      ['A ficha abre ao lado do Kanban', 'Clique no card: a ficha abre num painel à direita e o Kanban continua atrás, com seu filtro e na mesma posição. Feche com ✕, Esc ou clicando fora. Use "‹ anterior" e "próximo ›" para passar pelos médicos da mesma coluna.'],
+      ['"Já falei com o médico"', 'No Novo médico, marque essa opção e o cadastro já entra em Aguardando médico, com a ação "Cobrar retorno do médico". Sem precisar abrir a ficha e mover depois.'],
+      ['Seu filtro de hospital fica guardado', 'O Kanban volta com o último hospital que você filtrou, e os hospitais que você mais usa viram atalhos de um clique ao lado do filtro.'],
+    ],
+  },
+  {
     id: 9, data: '29/10', titulo: 'Quem faz o quê no fluxo',
     itens: [
       ['Escalista', 'Cadastra o médico (entra em Primeiro contato), pode mover para Aguardando médico e corrigir os cadastros que ele mesmo fez. Também registra a próxima ação (Feito / Amanhã) de qualquer médico.'],

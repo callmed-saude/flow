@@ -84,11 +84,13 @@ function renderFluxo() {
   const root = $('#view-fluxo');
   if (!root.dataset.built) {
     root.dataset.built = '1';
+    { const nomes = new Set(S.hospitals.map((h) => h.nome)); const salvo = hospLembrados().filter((h) => nomes.has(h)); if (!F.hospitals.length && salvo.length) F.hospitals = salvo; } // volta com o último filtro de hospital
     root.innerHTML = `
       <div class="op-top">
         <div class="op-filters">
           <input id="f-search" placeholder="Buscar nome, CRM, CPF, hospital ou telefone" aria-label="Buscar médico">
           <div style="position:relative" id="f-hosp-wrap"><div id="fx-hosp-top" style="display:contents"></div></div>
+          <span id="fx-hosp-chips" class="hosp-chips"></span>
           <button id="f-toggle">${ic('sliders', 15)}Filtros<span id="f-count" class="op-fcount" hidden></span></button>
           <div class="seg-toggle" id="fx-mode"><button data-mode="jornada">Jornada</button><button data-mode="kanban">Kanban</button></div>
           <div style="position:relative" id="fx-per-wrap">
@@ -127,10 +129,32 @@ function renderFluxo() {
 }
 VIEWS.fluxo = renderFluxo;
 
+// ---------- filtro de hospital lembrado + atalhos dos hospitais mais usados (de cada pessoa, neste navegador) ----------
+const hospChaveLS = (k) => `flow:${k}:` + String((S.user && S.user.email) || '').toLowerCase();
+function hospLembrados() { try { return JSON.parse(localStorage.getItem(hospChaveLS('hospfiltro')) || '[]'); } catch (_) { return []; } }
+function hospUso() { try { return JSON.parse(localStorage.getItem(hospChaveLS('hospuso')) || '{}'); } catch (_) { return {}; } }
+let hospUltimoSalvo = null;
+function salvarHospFiltro() {
+  const atual = JSON.stringify(F.hospitals);
+  if (atual === hospUltimoSalvo) return;
+  hospUltimoSalvo = atual;
+  try {
+    localStorage.setItem(hospChaveLS('hospfiltro'), atual);
+    if (F.hospitals.length === 1) { const u = hospUso(); u[F.hospitals[0]] = (u[F.hospitals[0]] || 0) + 1; localStorage.setItem(hospChaveLS('hospuso'), JSON.stringify(u)); }
+  } catch (_) { /* sem armazenamento */ }
+}
+function desenharAtalhosHosp() {
+  const box = $('#fx-hosp-chips'); if (!box) return;
+  const nomes = new Set(S.hospitals.filter((h) => h.ativo).map((h) => h.nome));
+  const top = Object.entries(hospUso()).filter(([h]) => nomes.has(h)).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([h]) => h);
+  box.innerHTML = top.map((h) => `<button class="hosp-chip ${F.hospitals.length === 1 && F.hospitals[0] === h ? 'on' : ''}" data-hchip="${esc(h)}" title="Mostrar só ${esc(h)}">${esc(h.replace(/^Hospital (e Maternidade )?/, ''))}</button>`).join('');
+  $$('[data-hchip]', box).forEach((b) => b.onclick = () => { const h = b.dataset.hchip; F.hospitals = F.hospitals.length === 1 && F.hospitals[0] === h ? [] : [h]; FX.cell = null; buildFilters(); refreshFluxo(); });
+}
 async function refreshFluxo() {
   if (!$('#fx-body')) return;
   renderKpis();
   syncFilterWidgets();
+  salvarHospFiltro(); desenharAtalhosHosp();
   $$('#fx-mode button').forEach((b) => b.classList.toggle('active', b.dataset.mode === FX.mode));
   $('#fx-per-wrap').hidden = FX.mode !== 'jornada';
   { const [a, b] = perRange(); $('#fx-range').textContent = `${fmtDate(a)} – ${fmtDate(b)} · ${GRAN_LABEL[FX.gran]}`; }
@@ -595,6 +619,8 @@ function cardHtml(d) {
 let dragDoctor = null, dragCol = null;
 function renderBoard(list) {
   const body = $('#fx-body');
+  // guarda a rolagem do quadro e de cada coluna: redesenhar (mudança, atualização automática) não joga a pessoa para o começo
+  const rolagem = { x: $('.kanban-wrap', body)?.scrollLeft || 0, cols: Object.fromEntries($$('.kanban-col', body).map((c) => [c.dataset.stage, $('.kanban-col-body', c)?.scrollTop || 0])) };
   const byStage = {};
   list.forEach((d) => { (byStage[d.stage] ||= []).push(d); });
   body.innerHTML = `<div class="kanban-wrap"><div class="kanban-board" id="fx-board">${S.stages.map((s) => {
@@ -619,9 +645,10 @@ function renderBoard(list) {
   }).join('')}${S.isAdmin ? '<button class="newcol" id="fx-newcol">＋ Nova coluna</button>' : ''}</div></div>
     <div class="kb-barra" id="kb-barra" title="Arraste para ver as outras colunas"><div></div></div>`;
   const board = $('#fx-board');
+  { const w = $('.kanban-wrap', body); if (w) w.scrollLeft = rolagem.x; $$('.kanban-col', body).forEach((c) => { const b = $('.kanban-col-body', c); if (b && rolagem.cols[c.dataset.stage]) b.scrollTop = rolagem.cols[c.dataset.stage]; }); }
   // barra de rolagem lateral fixa no rodapé da tela (a do quadro ficava lá embaixo, fora da vista) — pedido da Denise, 29/10
   { const wrap = $('.kanban-wrap', body), barra = $('#kb-barra'), dentro = barra.firstElementChild;
-    const medir = () => { dentro.style.width = wrap.scrollWidth + 'px'; barra.hidden = wrap.scrollWidth <= wrap.clientWidth + 2; };
+    const medir = () => { dentro.style.width = wrap.scrollWidth + 'px'; barra.hidden = wrap.scrollWidth <= wrap.clientWidth + 2; barra.scrollLeft = wrap.scrollLeft; };
     barra.onscroll = () => { if (Math.abs(wrap.scrollLeft - barra.scrollLeft) > 1) wrap.scrollLeft = barra.scrollLeft; };
     wrap.onscroll = () => { if (Math.abs(barra.scrollLeft - wrap.scrollLeft) > 1) barra.scrollLeft = wrap.scrollLeft; };
     medir(); setTimeout(medir, 300); window.addEventListener('resize', medir); }
