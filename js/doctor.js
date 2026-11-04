@@ -540,7 +540,7 @@ function openMessages(single) {
     const list = recipients();
     $('#ms-body', el).innerHTML = `
       <div class="toolbar">
-        <select class="inp" id="ms-ch"><option value="wa" ${channel === 'wa' ? 'selected' : ''}>WhatsApp</option><option value="mail" ${channel === 'mail' ? 'selected' : ''}>E-mail</option></select>
+        <span class="tagx">WhatsApp</span>
         ${single ? '' : `<select class="inp" id="ms-stage"><option value="_todos" ${stage === '_todos' ? 'selected' : ''}>Todos os pendentes</option>${S.stages.filter((s) => !FINAL_STAGES.includes(s.id)).map((s) => `<option value="${s.id}" ${s.id === stage ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}</select>
         <button class="btn btn-line btn-sm" id="ms-all">${sel.size === list.length && list.length ? 'Desmarcar todos' : 'Selecionar todos'}</button>`}
       </div>
@@ -551,13 +551,12 @@ function openMessages(single) {
       </div>
       <div class="field"><label>Mensagem · variáveis {nome} {hospital} {especialidade} {crm}</label><textarea class="inp" id="ms-text" style="min-height:110px">${esc(text)}</textarea></div>
       ${channel === 'wa' && sel.size > 1 ? '<div class="alert a small">Cada destinatário abre uma aba do WhatsApp. Se o navegador bloquear, permita pop-ups para este site.</div>' : ''}`;
-    $('#ms-send', el).textContent = `Enviar (${sel.size}) via ${channel === 'wa' ? 'WhatsApp' : 'E-mail'}`;
-    $('#ms-ch', el).onchange = (e) => { channel = e.target.value; draw(); };
+    $('#ms-send', el).textContent = `Abrir ${sel.size} conversa(s) no WhatsApp`;
     const st = $('#ms-stage', el);
     if (st) st.onchange = (e) => { stage = e.target.value; text = TEMPLATES[stage] || TEMPLATES._todos; sel.clear(); draw(); };
     const all = $('#ms-all', el);
     if (all) all.onclick = () => { if (sel.size === list.length) sel.clear(); else list.forEach((d) => sel.add(d.id)); draw(); };
-    $$('.doc-row input', el).forEach((c) => c.onchange = () => { c.checked ? sel.add(c.value) : sel.delete(c.value); $('#ms-send', el).textContent = `Enviar (${sel.size}) via ${channel === 'wa' ? 'WhatsApp' : 'E-mail'}`; });
+    $$('.doc-row input', el).forEach((c) => c.onchange = () => { c.checked ? sel.add(c.value) : sel.delete(c.value); $('#ms-send', el).textContent = `Abrir ${sel.size} conversa(s) no WhatsApp`; });
     $('#ms-text', el).oninput = (e) => { text = e.target.value; };
   };
   draw();
@@ -569,16 +568,13 @@ function openMessages(single) {
     for (const id of sel) {
       const d = S.doctors.find((x) => x.id === id) || single;
       const msg = fillTemplate(text, d);
-      if (channel === 'wa') {
-        if (!d.whatsapp) { skipped++; continue; }
-        window.open(waLink(d.whatsapp, msg), '_blank');
-      } else {
-        window.open(`mailto:?subject=${encodeURIComponent('CallMed - Atualização de Cadastro - ' + d.hospital)}&body=${encodeURIComponent(msg)}`, '_blank');
-      }
+      // o Flow só abre a conversa com a mensagem pronta; quem envia é a pessoa, no WhatsApp. O histórico diz exatamente isso.
+      if (!d.whatsapp) { skipped++; continue; }
+      window.open(waLink(d.whatsapp, msg), '_blank');
       sent++; done.push(d);
     }
-    if (done.length) await sb.from('flow_activities').insert(done.map((d) => ({ doctor_id: d.id, type: 'cobranca', description: `Cobrança enviada via ${channel === 'wa' ? 'WhatsApp' : 'e-mail'}` })));
-    if (sent) toast(`${sent} mensagem(ns) enviada(s) via ${channel === 'wa' ? 'WhatsApp' : 'e-mail'}!`, 'ok');
+    if (done.length) await sb.from('flow_activities').insert(done.map((d) => ({ doctor_id: d.id, type: 'cobranca', description: 'WhatsApp aberto para cobrança (mensagem pronta; o envio é confirmado no WhatsApp)' })));
+    if (sent) toast(`${sent} conversa(s) aberta(s) no WhatsApp com a mensagem pronta. Aperte enviar em cada uma.`, 'ok');
     if (skipped) toast(`${skipped} médico(s) sem WhatsApp cadastrado.`, 'err');
     m.close();
   };
