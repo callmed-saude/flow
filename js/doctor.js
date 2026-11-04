@@ -107,7 +107,6 @@ function openNewDoctor() {
   $('#nd-crm', el).addEventListener('input', render);
   render();
   $('#nd-hosp-novo', el).onclick = (e) => { e.preventDefault(); hospitalNovoDialog({ onCriado: (nome) => { hospSel.add(nome); render(); } }); };
-  try { $('#nd-falei', el).checked = localStorage.getItem('flow:jafalei') === '1'; } catch (_) { /* ignora */ } // lembra a última escolha
 
   $('#nd-ok', el).onclick = async () => {
     const btn = $('#nd-ok', el);
@@ -127,13 +126,12 @@ function openNewDoctor() {
     try { if (S.profile?.setor !== 'cadastro') localStorage.setItem('flow:handoff', base.proximo_responsavel_id); } catch (_) { /* ignora */ }
     let created = 0, failed = 0;
     const jaFalei = $('#nd-falei', el).checked;
-    try { localStorage.setItem('flow:jafalei', jaFalei ? '1' : '0'); } catch (_) { /* ignora */ }
     for (const h of hospSel) {
       if (conf[h]) {
         await sb.from('flow_activities').insert({ doctor_id: conf[h].d.id, type: 'note', description: `Tentativa de novo cadastro bloqueada — duplicidade por ${conf[h].by}. Motivo: ${reasons[h].trim()}` });
         continue;
       }
-      const { data, error } = await sb.from('flow_doctors').insert({ ...base, hospital: h }).select().single();
+      const { data, error } = await sb.from('flow_doctors').insert({ ...base, hospital: h, ...(jaFalei ? { proxima_acao: ACAO_POR_ETAPA.aguardando_medico, proxima_data: addBusinessDays(1) } : {}) }).select().single();
       if (error) { failed++; toast(friendlyDbError(error, `Erro ao cadastrar em ${h}`), 'err'); continue; }
       S.doctors.unshift(data);
       S.docProgress[data.id] = 0;
@@ -143,7 +141,14 @@ function openNewDoctor() {
         const st = stageById('aguardando_medico');
         const patch = { stage: 'aguardando_medico', stage_entered_at: new Date().toISOString(), sla_hours: st?.sla_hours ?? 24, proxima_acao: ACAO_POR_ETAPA.aguardando_medico, proxima_data: addBusinessDays(1) };
         const { error: e2 } = await sb.from('flow_doctors').update(patch).eq('id', data.id);
-        if (!e2) { Object.assign(data, patch); await sb.from('flow_activities').insert({ doctor_id: data.id, type: 'stage_change', description: `Movido para ${st?.label || 'Aguardando médico'}` }); }
+        if (e2) toast(`${data.name} (${h}) foi cadastrado, mas ficou em Primeiro contato: ${friendlyDbError(e2, 'não deu para mover')}`, 'err');
+        else {
+          Object.assign(data, patch);
+          const { data: act } = await sb.from('flow_activities').insert({ doctor_id: data.id, type: 'stage_change', description: `Movido para ${st?.label || 'Aguardando médico'}` }).select().single();
+          if (typeof STAGE_EV !== 'undefined' && STAGE_EV && act) (STAGE_EV[data.id] ||= []).push({ at: new Date(act.created_at), stage: 'aguardando_medico' });
+          if (typeof ACTS !== 'undefined') ACTS = null;
+          if (typeof notifyPainel === 'function') notifyPainel(data, 'aguardando_medico');
+        }
       }
       created++;
     }
@@ -170,7 +175,7 @@ async function openDoctor(d) {
   if (PV.gaveta || (GAVETA_DE.includes(currentView) && gavetaCabe())) abrirGaveta();
   else go('medico');
   await loadDoctorDetail();
-  drawMedico();
+  if (PV.doctor === d) drawMedico();
 }
 function abrirGaveta() {
   const v = $('#view-medico');
@@ -183,7 +188,7 @@ function abrirGaveta() {
   }
   v.scrollTop = 0;
 }
-function fecharGaveta(semAtualizar) {
+function fecharGaveta() {
   if (!PV.gaveta) return;
   PV.gaveta = false;
   const v = $('#view-medico'); v.classList.remove('active', 'gaveta');
@@ -191,7 +196,13 @@ function fecharGaveta(semAtualizar) {
   const f = $('#pv-fundo'); if (f) f.hidden = true;
   PV.doctor = null; // a tela de trás já foi atualizada a cada mudança (afterDoctorChange): fechar não redesenha, e a rolagem fica onde estava
 }
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && PV.gaveta && !document.querySelector('.modal-bg') && !document.querySelector('#ac-ed, #ac-sel')) fecharGaveta(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || !PV.gaveta || document.querySelector('.modal-bg') || document.querySelector('#ac-ed, #ac-sel')) return;
+  const a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.value) return; // não perde o que está sendo digitado
+  fecharGaveta();
+});
+/** "anterior / próximo" só faz sentido no Kanban (lá existe coluna). */
+const navColuna = () => PV.back === 'fluxo' && typeof FX !== 'undefined' && FX.mode === 'kanban';
 /** Médicos vizinhos na mesma coluna (mesma etapa, mesmo filtro da tela de origem) para o "anterior / próximo". */
 function vizinhosNaColuna(d) {
   const base = (currentView === 'fluxo' && typeof filteredDoctors === 'function') ? filteredDoctors() : S.doctors;
@@ -199,10 +210,12 @@ function vizinhosNaColuna(d) {
 }
 async function loadDoctorDetail() {
   const d = PV.doctor;
+  if (!d) return;
   const [a, dd] = await Promise.all([
     sb.from('flow_activities').select('*').eq('doctor_id', d.id).order('created_at', { ascending: false }).limit(500),
     sb.from('flow_doctor_documents').select('*').eq('doctor_id', d.id),
   ]);
+  if (PV.doctor !== d) return; // a pessoa já passou para outro médico (anterior/próximo): descarta a resposta atrasada
   PV.acts = a.data || []; PV.docs = dd.data || [];
 }
 VIEWS.medico = () => { if (PV.doctor) drawMedico(); else go('fluxo'); };
@@ -222,7 +235,7 @@ function drawMedico() {
   const TABS = [['resumo', 'Resumo'], ['docs', `Documentos · ${S.docProgress[d.id] || 0}%`], ['historico', `Histórico · ${PV.acts.length}`]];
   root.innerHTML = `
     <div class="person-header"><div style="flex:1;min-width:0">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${PV.gaveta ? `<span class="pv-nav"><button class="btn-ghost" id="pv-fechar" title="Fechar (Esc)">✕ Fechar</button><button class="btn-ghost" id="pv-ant" title="Médico anterior desta coluna">‹ anterior</button><button class="btn-ghost" id="pv-prox" title="Próximo médico desta coluna">próximo ›</button></span>` : `<button class="btn-ghost" id="pv-back">← ${esc(VIEW_TITLES[PV.back] || 'Fluxo')}</button>`}<h2 style="margin:0">${esc(d.name)}</h2></div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">${PV.gaveta ? `<span class="pv-nav"><button class="btn-ghost" id="pv-fechar" title="Fechar (Esc)">✕ Fechar</button>${navColuna() ? '<button class="btn-ghost" id="pv-ant" title="Médico anterior desta coluna">‹ anterior</button><button class="btn-ghost" id="pv-prox" title="Próximo médico desta coluna">próximo ›</button>' : ''}</span>` : `<button class="btn-ghost" id="pv-back">← ${esc(VIEW_TITLES[PV.back] || 'Fluxo')}</button>`}<h2 style="margin:0">${esc(d.name)}</h2></div>
       <div class="tags">
         <span class="ptag brand">${esc(d.hospital)}</span>
         ${d.crm ? `<span class="ptag">${esc(d.crm)}</span>` : ''}
@@ -258,6 +271,8 @@ function drawMedico() {
   if ($('#pv-back')) $('#pv-back').onclick = () => go(PV.back || 'fluxo');
   if (PV.gaveta) {
     $('#pv-fechar').onclick = () => fecharGaveta();
+  }
+  if (PV.gaveta && navColuna()) {
     const viz = vizinhosNaColuna(d), i = viz.findIndex((x) => x.id === d.id);
     const ant = i > 0 ? viz[i - 1] : null, prox = i >= 0 && i < viz.length - 1 ? viz[i + 1] : null;
     $('#pv-ant').disabled = !ant; $('#pv-prox').disabled = !prox;

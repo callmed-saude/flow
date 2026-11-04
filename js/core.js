@@ -514,6 +514,12 @@ async function reloadAll(silent) {
   try {
     await loadCore();
     VIEWS[currentView] && VIEWS[currentView]();
+    // a ficha aberta passa a apontar para o cadastro recarregado (senão mostraria "Cadastro não encontrado" e gravaria no objeto velho)
+    if (typeof PV !== 'undefined' && PV.doctor) {
+      const novo = S.doctors.find((x) => x.id === PV.doctor.id);
+      if (!novo) { if (PV.gaveta) fecharGaveta(); }
+      else { PV.doctor = novo; if (PV.gaveta || currentView === 'medico') drawMedico(); }
+    }
     loadNotifs(); // traz avisos e recados em destaque que chegaram com a tela aberta
     if (!silent) toast('Dados atualizados!', 'ok');
   } catch (err) { toast('Erro ao carregar: ' + err.message, 'err'); }
@@ -530,6 +536,7 @@ async function startApp() {
     chip.textContent = ((pt[0] || '?')[0] + (pt.length > 1 ? pt[pt.length - 1][0] : '')).toUpperCase();
     chip.title = nm + (S.profile.setor ? ' · ' + (SETOR_USUARIO[S.profile.setor] || S.profile.setor) : ''); }
   $('#view-fluxo').innerHTML = '<div class="op-more">Carregando…</div>'; delete $('#view-fluxo').dataset.built;
+  if (typeof F !== 'undefined') F.hospitals = []; if (typeof hospUltimoSalvo !== 'undefined') hospUltimoSalvo = null; // cada pessoa volta com o filtro dela, não com o de quem usou antes
   try { await loadCore(); } catch (err) { toast('Erro ao carregar dados: ' + err.message, 'err'); return; }
   $('#rail-usuarios').hidden = !S.isAdmin;
   $('#who-email').textContent = S.user.email || '';
