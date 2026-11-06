@@ -4,11 +4,11 @@
    e quem estiver com a aba aberta vê a faixa de versão nova. Correção de erro nunca espera a sexta. */
 'use strict';
 
-const LIB = { pend: new Set(), datas: {}, lista: [], carregado: false };
+const LIB = { pend: new Set(), datas: {}, lista: [], carregado: false, ok: false };
 /** Capacity Case = administrador com e-mail @capacitycase.com.br (o banco confere de novo em flow_e_capacity). */
 function libCapacity() { return !!(S.isAdmin && /@capacitycase\.com\.br$/i.test((S.user && S.user.email) || '')); }
 /** A equipe já vê esta entrega? (a Capacity Case vê tudo, com a borda roxa no que ainda não saiu) */
-function libLivre(chave) { return libCapacity() || !LIB.pend.has(chave); }
+function libLivre(chave) { return libCapacity() || (LIB.ok && !LIB.pend.has(chave)); } // sem resposta do banco, nada do calendário aparece para a equipe
 function libSoVoce(chave) { return libCapacity() && LIB.pend.has(chave); }
 function libRot(chave) { const d = LIB.datas[chave]; return d ? 'sai ' + d.slice(8, 10) + '/' + d.slice(5, 7) : 'sem data'; }
 /** classe e atributos para marcar um elemento que só a Capacity Case vê: `<button class="x${libC(k)}"${libD(k)}>` */
@@ -17,8 +17,8 @@ function libD(chave) { return libSoVoce(chave) ? ` data-sv="${libRot(chave)}" ti
 const libPend = (data) => new Set((data || []).map((x) => (typeof x === 'string' ? x : Object.values(x)[0])));
 
 async function libCarrega() {
-  try { const { data, error } = await sb.rpc('flow_liberacoes_pendentes'); if (error) throw error; LIB.pend = libPend(data); }
-  catch (_) { LIB.pend = new Set(LIB.lista.map((l) => l.chave)); } // sem resposta do banco: o que já se sabia que estava guardado continua guardado
+  try { const { data, error } = await sb.rpc('flow_liberacoes_pendentes'); if (error) throw error; LIB.pend = libPend(data); LIB.ok = true; }
+  catch (_) { LIB.ok = false; }
   if (libCapacity()) {
     try { const { data } = await sb.rpc('flow_liberacoes_lista'); LIB.lista = data || []; LIB.datas = Object.fromEntries(LIB.lista.map((l) => [l.chave, l.libera_em])); } catch (_) { /* segue */ }
   }
@@ -30,7 +30,7 @@ async function libConfere() {
   try {
     const { data, error } = await sb.rpc('flow_liberacoes_pendentes'); if (error) return;
     const agora = libPend(data);
-    if ([...LIB.pend].some((k) => !agora.has(k)) && window.ACOMP && window.ACOMP._testeFaixa) window.ACOMP._testeFaixa();
+    if ([...LIB.pend].some((k) => !agora.has(k)) && window.ACOMP && window.ACOMP.mostrarFaixa) window.ACOMP.mostrarFaixa();
   } catch (_) { /* sem rede: tenta de novo depois */ }
 }
 setInterval(libConfere, 10 * 60000);

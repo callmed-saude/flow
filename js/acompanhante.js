@@ -77,6 +77,7 @@ const Ditado = {
   }
   A.verificarVersao = verificarVersao;
   A._testeFaixa = mostrarFaixa;
+  A.mostrarFaixa = mostrarFaixa; // usada também pela liberação de entregas (js/entregas.js)
   setInterval(verificarVersao, 120000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) verificarVersao(); });
 
