@@ -220,7 +220,7 @@ const Ditado = {
     experimento: 'É assim que o balão aparece. O que você tem achado do Flow até agora?',
   };
   const TIPO_PADRAO = { travou: 'problema', recusa: 'problema', desfez: 'duvida', voltou: 'duvida' };
-  const TIPOS = [['melhoria', 'Ideia de melhoria'], ['problema', 'Algo não funciona'], ['duvida', 'Dúvida']];
+  const TIPOS = [['melhoria', 'Ideia de melhoria'], ['problema', 'Algo não funciona'], ['urgente', 'Urgente: impede o uso'], ['duvida', 'Dúvida']];   // urgente = resolvido em até 48 horas (05/11/2026)
   const RESPONSAVEL = 'Luiz';
   const ac = { motivo: null, pergunta: null, tipo: 'melhoria', print: null, audio: null, voz: false, timerBalao: null, ultimoAuto: 0, ultimaDuvida: 0, gen: 0 };
   const $id = (id) => document.getElementById(id);
@@ -449,11 +449,11 @@ const Ditado = {
       const rota = rotaAtual();
       const contexto = { via: 'balao', motivo: ac.motivo, pergunta: ac.pergunta || null, rota, largura: window.innerWidth, ultimos: ultimos.slice(-20) };
       const { error } = await sb.from('flow_sugestoes').insert({
-        texto, anexos, audio_path, origem: (ac.voz || audio_path) ? 'voz' : 'texto', tipo: ac.tipo, tela: nomeTela(rota), prioridade: 'normal', status: 'nova', contexto,
+        texto, anexos, audio_path, origem: (ac.voz || audio_path) ? 'voz' : 'texto', tipo: ac.tipo === 'urgente' ? 'problema' : ac.tipo, tela: nomeTela(rota), prioridade: ac.tipo === 'urgente' ? 'urgente' : 'normal', status: 'nova', contexto,
         historico: [{ em: new Date().toISOString(), por: actorName(), de: 'nova', para: 'nova', nota: 'Registrada pelo balão 💬' }],
       });
       if (error) throw error;
-      const ok = $id('ac-ok'); ok.hidden = false; ok.textContent = `Anotado! O ${RESPONSAVEL} já recebeu. 🙌`;
+      const ok = $id('ac-ok'); ok.hidden = false; ok.textContent = `Anotado! O ${RESPONSAVEL} já recebeu. ${ac.tipo === 'urgente' ? 'Como é urgente, resolvemos em até 48 horas.' : 'As melhorias saem às sextas.'} 🙌`;
       uso('balao', ac.motivo, { evento: 'fechou', resposta: 'enviou' });
       ac.print = null; ac.audio = null; ac.voz = false;
       setTimeout(() => { $id('ac-box').hidden = true; }, 3500);

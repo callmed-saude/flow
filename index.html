@@ -438,6 +438,10 @@
   .sg-aviso{ display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin:0 0 14px; padding:12px 16px; border-radius:var(--radius-md); background:var(--brand-soft); border:1px solid var(--brand-line);}
   .sg-aviso p{ margin:4px 0 0; font-size:13.5px; color:var(--ink-soft);} .sg-aviso .sg-aviso-resp{ color:var(--ink); font-weight:500;}
   .sg-aviso-bt{ display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  /* o que só a Capacity Case vê (entrega que ainda não saiu para a equipe, ou tela só dela): borda roxa tracejada e 🔒 (05/11/2026) */
+  .so-voce{ outline:2px dashed #9333ea !important; outline-offset:-3px;}
+  #rail .so-voce::after{ content:"🔒"; position:absolute; top:3px; left:5px; font-size:10px; line-height:1;}
+  .btn.so-voce::after, .tabs .so-voce::after{ content:" 🔒 " attr(data-sv); font-size:11px; font-weight:600; color:#7e22ce;}
   #rail .nav-btn{ position:relative;} .sg-badge{ position:absolute; top:4px; right:10px; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--red); color:#fff; font:700 10px/16px var(--f-ui); font-style:normal; text-align:center;}
   .sg-thumb{ max-width:220px; max-height:150px; border:1px solid var(--border); border-radius:8px; display:block; background:#f2f3f9; min-width:60px; min-height:40px;}
   .sg-file{ border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 10px; font-size:12.5px; color:var(--brand); text-decoration:none; font-weight:600;}
@@ -775,6 +779,7 @@
     <button class="nav-btn" data-view="rqe" title="Solicitações de RQE" hidden><i data-ic="rqe" data-size="19"></i><span>RQE</span></button>
     <button class="nav-btn" data-view="relatorios" title="Relatórios e exportação para auditoria" hidden><i data-ic="file" data-size="19"></i><span>Relatórios</span></button>
     <button class="nav-btn" data-view="auditoria" title="Quem fez o quê, e quando" hidden><i data-ic="history" data-size="19"></i><span>Auditoria</span></button>
+    <button class="nav-btn so-voce" data-view="entregas" data-sv="só você" title="Entregas: o calendário das melhorias (só a Capacity Case vê)" id="rail-entregas" hidden><i data-ic="history" data-size="19"></i><span>Entregas</span></button>
     <button class="nav-btn" data-view="sugestoes" title="Sugestões de melhoria do sistema"><i data-ic="idea" data-size="19"></i><span>Sugestões</span></button>
     <button class="nav-btn" data-view="usuarios" title="Usuários, hospitais e migração" id="rail-usuarios" hidden><i data-ic="users" data-size="19"></i><span>Admin</span></button>
   </nav>
@@ -789,6 +794,7 @@
     <section id="view-relatorios" class="view pgview"></section>
     <section id="view-auditoria" class="view pgview"></section>
     <section id="view-sugestoes" class="view pgview"></section>
+    <section id="view-entregas" class="view pgview"></section>
     <section id="view-usuarios" class="view pgview"></section>
   </div>
 </div>
@@ -798,18 +804,19 @@
 
 <script>window.FLOW_DEMO = new URLSearchParams(location.search).has('demo');</script>
 <script>window.FLOW_FALHAS = []; window.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'SCRIPT') window.FLOW_FALHAS.push(String(t.src).split('/').pop().split('?')[0]); }, true);</script>
-<script src="config.js?v=20261104204235"></script>
-<script src="js/core.js?v=20261104204235"></script>
-<script src="js/hoje.js?v=20261104204235"></script>
-<script src="js/fluxo.js?v=20261104204235"></script>
-<script src="js/doctor.js?v=20261104204235"></script>
-<script src="js/rqe.js?v=20261104204235"></script>
-<script src="js/reports.js?v=20261104204235"></script>
-<script src="js/sugestoes.js?v=20261104204235"></script>
-<script src="js/admin.js?v=20261104204235"></script>
-<script src="js/acompanhante.js?v=20261104204235"></script>
-<script src="js/apresentacao.js?v=20261104204235"></script>
-<script src="js/novidades.js?v=20261104204235"></script>
-<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261104204235"><\/script><script src="js/demo-tour.js?v=20261104204235"><\/script>');</script>
+<script src="config.js?v=20261105210957"></script>
+<script src="js/core.js?v=20261105210957"></script>
+<script src="js/hoje.js?v=20261105210957"></script>
+<script src="js/fluxo.js?v=20261105210957"></script>
+<script src="js/doctor.js?v=20261105210957"></script>
+<script src="js/rqe.js?v=20261105210957"></script>
+<script src="js/reports.js?v=20261105210957"></script>
+<script src="js/sugestoes.js?v=20261105210957"></script>
+<script src="js/entregas.js?v=20261105210957"></script>
+<script src="js/admin.js?v=20261105210957"></script>
+<script src="js/acompanhante.js?v=20261105210957"></script>
+<script src="js/apresentacao.js?v=20261105210957"></script>
+<script src="js/novidades.js?v=20261105210957"></script>
+<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261105210957"><\/script><script src="js/demo-tour.js?v=20261105210957"><\/script>');</script>
 </body>
 </html>

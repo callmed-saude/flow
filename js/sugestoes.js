@@ -40,6 +40,7 @@ function renderSugestoes() {
     root.innerHTML = `
       <div class="pg-head"><h2>Sugestões de melhoria</h2><span class="sub">Ideias, problemas e pedidos para o sistema. ${S.isAdmin ? 'Como gestor, você vê as sugestões de todos.' : 'Só você e a gestão veem as suas sugestões; a resposta aparece aqui e na tela de onde ela saiu.'}</span></div>
       <div class="es-box">
+        <div style="margin:0 0 10px;padding:8px 12px;border-radius:8px;background:var(--surface-2, #f3f6f9);font-size:13px">📅 <b>Como funcionam as entregas:</b> As melhorias do sistema saem <b>toda sexta-feira, até o fim do dia</b>. O que é <b>urgente</b> (algo não funciona e impede usar o sistema) é resolvido em <b>até 48 horas</b>: marque "Urgente" ao enviar.</div>
         <div class="sg-row" style="margin-bottom:8px"><span class="ql" style="margin:0">Registrando como</span><b>${esc(actorName())}</b></div>
         <textarea id="sg-text" rows="4" placeholder="Escreva livremente, ou clique em Gravar e narre a sua ideia. Dá para colar um print (Ctrl+V) ou arrastar arquivos para cá."></textarea>
         <div id="sg-files" class="sg-files"></div>
@@ -49,7 +50,7 @@ function renderSugestoes() {
           <span id="sg-mic-st" style="font-size:12px;color:var(--red)"></span>
           <select id="sg-tipo">${Object.entries(SG_TIPOS).map(([k, l]) => `<option value="${k}">${l}</option>`).join('')}</select>
           <select id="sg-tela"><option value="">Em qual tela? (opcional)</option>${SG_TELAS.map((t) => `<option>${esc(t)}</option>`).join('')}</select>
-          <select id="sg-prio"><option value="normal">Prioridade normal</option><option value="alta">Prioridade alta</option><option value="baixa">Prioridade baixa</option></select>
+          <select id="sg-prio" aria-label="Urgência"><option value="normal">Melhoria: entra na entrega de sexta</option><option value="urgente">Urgente: algo não funciona e impede o uso (até 48 h)</option></select>
           <span style="flex:1"></span><button id="sg-send" class="btn btn-primary">Enviar sugestão</button>
         </div>
         <audio id="sg-audio-prev" controls hidden style="margin-top:8px;width:100%"></audio>
@@ -154,7 +155,7 @@ function sgDraw() {
     const hist = r.historico || [];
     const aguardando = (r.resposta || '').startsWith('🔴');
     return `<div class="sg-card" data-id="${r.id}">
-      <div class="sg-top"><b>${esc(r.autor || '—')}</b><span class="sg-meta">${fmtDate(r.created_at, true)}</span><span class="tagx">${esc(SG_TIPOS[r.tipo] || r.tipo)}</span>${r.tela ? `<span class="tagx">${esc(r.tela)}</span>` : ''}${r.prioridade === 'alta' ? '<span class="tagx bad">Prioridade alta</span>' : r.prioridade === 'baixa' ? '<span class="tagx mute">Prioridade baixa</span>' : ''}${aguardando ? `<span class="tagx bad">💬 Aguardando o retorno de ${esc((r.autor || '').split(' ')[0] || 'quem sugeriu')}</span>` : ''}${r.origem === 'voz' ? '<span class="tagx">🎤 por voz</span>' : ''}<span style="flex:1"></span><span class="sg-status" style="background:${st[2]}">${st[1]}</span></div>
+      <div class="sg-top"><b>${esc(r.autor || '—')}</b><span class="sg-meta">${fmtDate(r.created_at, true)}</span><span class="tagx">${esc(SG_TIPOS[r.tipo] || r.tipo)}</span>${r.tela ? `<span class="tagx">${esc(r.tela)}</span>` : ''}${r.prioridade === 'urgente' ? '<span class="tagx bad">Urgente · até 48 h</span>' : r.prioridade === 'alta' ? '<span class="tagx bad">Prioridade alta</span>' : r.prioridade === 'baixa' ? '<span class="tagx mute">Prioridade baixa</span>' : ''}${aguardando ? `<span class="tagx bad">💬 Aguardando o retorno de ${esc((r.autor || '').split(' ')[0] || 'quem sugeriu')}</span>` : ''}${r.origem === 'voz' ? '<span class="tagx">🎤 por voz</span>' : ''}<span style="flex:1"></span><span class="sg-status" style="background:${st[2]}">${st[1]}</span></div>
       <div class="sg-text">${esc(r.texto).replace(/\n/g, '<br>')}</div>
       ${(r.anexos || []).length ? `<div class="sg-atts">${r.anexos.map((a) => (/^image\//.test(a.mime || '') ? `<a href="#" data-att="${esc(a.path)}" title="${esc(a.nome || '')}"><img class="sg-thumb" data-thumb="${esc(a.path)}" alt="${esc(a.nome || 'print')}"></a>` : `<a href="#" class="sg-file" data-att="${esc(a.path)}">📄 ${esc(a.nome || 'arquivo')}</a>`)).join('')}</div>` : ''}
       ${r.audio_path ? '<div class="sg-audio"><a href="#" data-act="audio">▶ ouvir o áudio original</a></div>' : ''}
@@ -274,7 +275,7 @@ async function sgSend() {
     if (error) throw error;
     ta.value = ''; SG.files = []; sgRenderFiles(); SG.audioBlob = null; SG.voz = false;
     const p = $('#sg-audio-prev'); p.hidden = true; p.removeAttribute('src');
-    toast('Sugestão registrada — obrigado!', 'ok');
+    toast($('#sg-prio').value === 'urgente' ? 'Registrada como urgente: resolvemos em até 48 horas.' : 'Sugestão registrada, obrigado! As melhorias saem às sextas.', 'ok');
     loadSugestoes();
   } catch (e) { toast('Erro: ' + (e.message || e), 'err'); }
   btn.disabled = false; btn.textContent = 'Enviar sugestão';

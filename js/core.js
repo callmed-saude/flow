@@ -475,7 +475,7 @@ function subscribeNotifs() {
 
 // ---------- navegação ----------
 const VIEWS = {};
-const VIEW_TITLES = { sobre: 'Apresentação', hoje: 'Hoje', fluxo: 'Médicos', medico: 'Médico', indicadores: 'Indicadores', sugestoes: 'Sugestões', rqe: 'RQE', relatorios: 'Relatórios', auditoria: 'Auditoria', usuarios: 'Administração' };
+const VIEW_TITLES = { sobre: 'Apresentação', hoje: 'Hoje', fluxo: 'Médicos', medico: 'Médico', indicadores: 'Indicadores', sugestoes: 'Sugestões', entregas: 'Entregas', rqe: 'RQE', relatorios: 'Relatórios', auditoria: 'Auditoria', usuarios: 'Administração' };
 /** Dica do "i" ao lado do título, por tela (sem dica, o "i" some). */
 /** Escalista (setor Escalas, sem ser administrador): cadastra, move só de Primeiro contato para Aguardando médico e edita só o que criou. O banco garante. */
 /** Acompanhamento (só leitura): vê tudo, exporta e manda sugestões; o banco bloqueia qualquer alteração. */
@@ -490,7 +490,7 @@ const VIEW_INFO = {
   sugestoes: 'Ideias, problemas e dúvidas sobre o sistema. Cada sugestão só aparece para quem a criou e para a gestão.',
   usuarios: 'Quem acessa o Flow, com qual papel, e a lista oficial de hospitais.',
 };
-const VIEW_SUBS = { sobre: 'Torre de Controle - CallMed · credenciamento de médicos', hoje: 'O que fazer agora', fluxo: 'Credenciamento de médicos', indicadores: 'Funil, SLA e gargalos', rqe: 'Registro de especialista no CREMESP', relatorios: 'Conversão, tempo e produtividade', auditoria: 'Quem fez o quê, e quando', sugestoes: 'Ideias e problemas do sistema', usuarios: 'Usuários e hospitais' };
+const VIEW_SUBS = { sobre: 'Torre de Controle - CallMed · credenciamento de médicos', hoje: 'O que fazer agora', fluxo: 'Credenciamento de médicos', indicadores: 'Funil, SLA e gargalos', rqe: 'Registro de especialista no CREMESP', relatorios: 'Conversão, tempo e produtividade', auditoria: 'Quem fez o quê, e quando', sugestoes: 'Ideias e problemas do sistema', entregas: 'Calendário das melhorias · só a Capacity Case', usuarios: 'Usuários e hospitais' };
 let currentView = 'fluxo';
 function go(view) {
   if (typeof PV !== 'undefined' && PV.gaveta && view !== 'medico') fecharGaveta(true); // trocar de tela fecha o painel da ficha
@@ -540,6 +540,7 @@ async function startApp() {
   if (typeof F !== 'undefined') F.hospitals = []; if (typeof hospUltimoSalvo !== 'undefined') hospUltimoSalvo = null; // cada pessoa volta com o filtro dela, não com o de quem usou antes
   try { await loadCore(); } catch (err) { toast('Erro ao carregar dados: ' + err.message, 'err'); return; }
   $('#rail-usuarios').hidden = !S.isAdmin;
+  if (typeof libCarrega === 'function') { await libCarrega(); $('#rail-entregas').hidden = !libCapacity(); }
   $('#who-email').textContent = S.user.email || '';
   $('#btn-backup').hidden = !S.isAdmin;
   loadNotifs();
@@ -547,7 +548,7 @@ async function startApp() {
   // quem nunca viu a Apresentação entra por ela; os demais voltam para a última tela (padrão: Médicos, no Kanban)
   let v = 'fluxo', viu = true;
   try { v = localStorage.getItem('flow:view2') || 'fluxo'; viu = !!localStorage.getItem(chaveSobre()); } catch (_) { /* ignora */ }
-  if ((['usuarios', 'auditoria', 'rqe'].includes(v) && !S.isAdmin) || v === 'medico') v = 'fluxo';
+  if ((['usuarios', 'auditoria', 'rqe'].includes(v) && !S.isAdmin) || v === 'medico' || (v === 'entregas' && !(typeof libCapacity === 'function' && libCapacity()))) v = 'fluxo';
   if (!viu && !window.FLOW_DEMO) v = 'sobre';
   go(VIEWS[v] ? v : 'fluxo');
   if (typeof Novidades !== 'undefined') Novidades.checar();

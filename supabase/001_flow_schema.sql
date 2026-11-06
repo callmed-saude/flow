@@ -771,3 +771,35 @@ create policy flow_docs_sel on storage.objects for select to authenticated using
                   or coalesce(s.anexos, '[]'::jsonb) @> jsonb_build_array(jsonb_build_object('path', storage.objects.name)))));
 -- flow_sugestao_retorno passou a exigir flow_is_member() (usuário desativado não mexe mais na própria sugestão)
 -- obs.: o setor acompanhamento continua podendo subir arquivo, porque manda print e áudio nas Sugestões
+
+-- ---------- migração 22 (05/11/2026): entregas às sextas e urgente em 48 horas (regra do negócio da Capacity Case) ----------
+-- Melhorias saem toda sexta, até o fim do dia; o que é urgente (algo não funciona e impede o uso) é resolvido em até 48 horas.
+-- O que fica pronto antes da sexta aparece só para a Capacity Case (e-mail @capacitycase.com.br) até a data de liberação.
+alter table public.flow_sugestoes drop constraint if exists flow_sugestoes_prioridade_check;
+alter table public.flow_sugestoes add constraint flow_sugestoes_prioridade_check check (prioridade in ('baixa','normal','alta','urgente'));
+create or replace function public.flow_e_capacity() returns boolean language sql stable security definer set search_path = public as $$
+  select public.flow_is_admin() and coalesce(auth.jwt() ->> 'email', '') ilike '%@capacitycase.com.br'
+$$;
+create table if not exists public.flow_liberacoes (
+  chave text primary key, titulo text not null, descricao text, pedido_por text, onde text,
+  libera_em date, condicao text, ordem integer not null default 0, atualizado_em timestamptz not null default now());
+alter table public.flow_liberacoes enable row level security;
+revoke all on public.flow_liberacoes from anon, authenticated;
+create or replace function public.flow_liberacoes_pendentes() returns setof text language plpgsql stable security definer set search_path = public as $$
+begin
+  if not public.flow_is_member() then raise exception 'Acesso negado.'; end if;
+  return query select l.chave from public.flow_liberacoes l where l.libera_em is null or l.libera_em > (now() at time zone 'America/Sao_Paulo')::date;
+end $$;
+create or replace function public.flow_liberacoes_lista() returns setof public.flow_liberacoes language plpgsql stable security definer set search_path = public as $$
+begin
+  if not public.flow_e_capacity() then raise exception 'Só a Capacity Case vê o calendário de entregas.'; end if;
+  return query select * from public.flow_liberacoes order by libera_em nulls last, ordem, chave;
+end $$;
+create or replace function public.flow_liberacao_data(p_chave text, p_data date) returns void language plpgsql security definer set search_path = public as $$
+begin
+  if not public.flow_e_capacity() then raise exception 'Só a Capacity Case muda o calendário de entregas.'; end if;
+  update public.flow_liberacoes set libera_em = p_data, atualizado_em = now() where chave = p_chave;
+  if not found then raise exception 'Entrega não encontrada.'; end if;
+end $$;
+revoke all on function public.flow_e_capacity(), public.flow_liberacoes_pendentes(), public.flow_liberacoes_lista(), public.flow_liberacao_data(text, date) from public, anon;
+grant execute on function public.flow_e_capacity(), public.flow_liberacoes_pendentes(), public.flow_liberacoes_lista(), public.flow_liberacao_data(text, date) to authenticated;

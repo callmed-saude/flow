@@ -4,6 +4,13 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
+    id: 12, data: '06/11', titulo: 'Melhorias toda sexta, urgente em até 48 horas',
+    itens: [
+      ['Entregas às sextas', 'As melhorias do Flow passam a sair toda sexta-feira, até o fim do dia, com o que a equipe sugeriu na semana.'],
+      ['Urgente em até 48 horas', 'Se algo não funciona e impede o uso, marque "Urgente" nas Sugestões ou no balão 💬: resolvemos em até 48 horas.'],
+    ],
+  },
+  {
     id: 11, data: '04/11', titulo: 'Menu mais curto e tela de Apresentação',
     itens: [
       ['Apresentação', 'Novo primeiro item do menu: o que é o Flow, quem faz o quê e o que estamos construindo. Quem entra pela primeira vez começa por ela.'],
