@@ -454,7 +454,7 @@ const Ditado = {
         historico: [{ em: new Date().toISOString(), por: actorName(), de: 'nova', para: 'nova', nota: 'Registrada pelo balão 💬' }],
       });
       if (error) throw error;
-      const ok = $id('ac-ok'); ok.hidden = false; ok.textContent = `Anotado! O ${RESPONSAVEL} já recebeu. ${ac.tipo === 'urgente' ? 'Como é urgente, resolvemos em até 48 horas.' : 'As melhorias saem às sextas.'} 🙌`;
+      const ok = $id('ac-ok'); ok.hidden = false; ok.textContent = `Anotado! O ${RESPONSAVEL} já recebeu. ${ac.tipo === 'urgente' ? 'Como é urgente, resolvemos em até 48 horas.' : 'As melhorias entram na versão de segunda.'} 🙌`;
       uso('balao', ac.motivo, { evento: 'fechou', resposta: 'enviou' });
       ac.print = null; ac.audio = null; ac.voz = false;
       setTimeout(() => { $id('ac-box').hidden = true; }, 3500);

@@ -52,7 +52,7 @@ function renderSobre() {
     <div class="sb-pilares">
       ${frente('Todo dia', ['Cada pessoa abre Médicos ou Hoje e trabalha nas suas ações.', 'Toda mudança de etapa e todo contato ficam no histórico.'])}
       ${frente('Toda semana', ['A gestão olha em Relatórios o funil, o SLA e onde está travando.'])}
-      ${frente('No caminho', ['O balão 💬 e as Sugestões chegam direto para quem ajusta o sistema.', 'As melhorias saem toda sexta-feira, até o fim do dia; o que é urgente (algo não funciona e impede o uso) é resolvido em até 48 horas.', 'Cada versão nova avisa no topo da tela e mostra o que mudou.'])}
+      ${frente('No caminho', ['O balão 💬 e as Sugestões chegam direto para quem ajusta o sistema.', 'A versão nova sai toda segunda-feira, com as sugestões da semana anterior; o que é urgente (algo não funciona e impede o uso) é resolvido em até 48 horas.', 'Cada versão nova avisa no topo da tela e mostra o que mudou.'])}
     </div>
 
     <h2 class="sb-h">Princípios</h2>
