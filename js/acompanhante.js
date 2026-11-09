@@ -141,8 +141,8 @@ const Ditado = {
     if (hist.length >= 3) {
       const [a, b, c] = hist.slice(-3);
       const secao = (x) => x.split('/')[1];
-      // A → B → A em menos de 30 s, B de outra seção (abrir a ficha e voltar para a lista não conta)
-      if (c.rota === a.rota && b.rota !== a.rota && secao(b.rota) !== secao(a.rota) && secao(b.rota) !== 'medico' && c.ts - a.ts < 30000 && a.ts - tsEntrou > 15000) duvida('voltou');
+      // A → B → A em menos de 30 s, B de outra seção (abrir e fechar fichas em sequência, ficha → Kanban → ficha, não conta)
+      if (c.rota === a.rota && b.rota !== a.rota && secao(b.rota) !== secao(a.rota) && secao(b.rota) !== 'medico' && secao(a.rota) !== 'medico' && c.ts - a.ts < 30000 && a.ts - tsEntrou > 15000) duvida('voltou');
     }
   }
   A.checarTela = checarTela;

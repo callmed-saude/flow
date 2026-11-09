@@ -338,10 +338,14 @@ function drawResumoTab(body, d) {
         ${d.dt_cobranca_doc ? pvField('Dt. cobrança doc.', esc(d.dt_cobranca_doc)) : ''}${d.dt_email_enviado ? pvField('Dt. e-mail enviado', esc(d.dt_email_enviado)) : ''}${d.dt_resp_hospital ? pvField('Dt. resposta hospital', esc(d.dt_resp_hospital)) : ''}
       </div></details>` : ''}</div>
     </div>
-    ${d.observations ? `<div class="es-box"><div class="ql">Observações</div><div style="font-size:13.5px;line-height:1.55;white-space:pre-wrap">${esc(d.observations)}</div></div>` : ''}
+    ${obsEditavel(d) ? `<div class="es-box${libC(OBS_LIB)}"${libD(OBS_LIB)}><div class="ql">Observações${libSoVoce(OBS_LIB) ? ' <span style="color:#7e22ce">🔒 ' + libRot(OBS_LIB) + '</span>' : ''}</div>
+      <textarea class="inp" id="pv-obs" rows="3" placeholder="Anote aqui o andamento com este médico…" style="font-size:13.5px;line-height:1.55;resize:vertical">${esc(d.observations || '')}</textarea>
+      <div id="pv-obs-acoes" style="display:none;gap:8px;margin-top:8px;align-items:center"><button class="btn btn-primary btn-sm" id="pv-obs-salvar">Salvar observações</button><button class="btn-ghost" id="pv-obs-desfazer">Desfazer</button><span class="muted small">Ctrl+Enter salva</span></div></div>`
+    : d.observations ? `<div class="es-box"><div class="ql">Observações</div><div style="font-size:13.5px;line-height:1.55;white-space:pre-wrap">${esc(d.observations)}</div></div>` : ''}
     <div class="es-box"><div class="ql">Outros cadastros deste médico</div>${otherHospitals(d)}</div>`;
   $$('#pv-body [data-other]').forEach((a) => a.onclick = (e) => { e.preventDefault(); openDoctor(S.doctors.find((x) => x.id === a.dataset.other)); });
   bindParecer(d);
+  bindObs(d);
 }
 
 /** Quadro do parecer jurídico: o Jurídico marca; os demais só veem. */
@@ -495,6 +499,25 @@ const CAMPO_NOME = { name: 'nome', crm: 'CRM', cpf: 'CPF', whatsapp: 'WhatsApp',
   disc: 'DISC', medsimples: 'MedSimples', setores: 'setores', doc_pendente: 'doc. pendente', cobranca: 'cobrança', cobranca_medsimples: 'cobrança MedSimples',
   cobranca2: 'cobrança 2', dt_cobranca_doc: 'dt. cobrança doc.', dt_email_enviado: 'dt. e-mail enviado', dt_resp_hospital: 'dt. resposta hospital', observations: 'observações' };
 /** Atualiza campos do médico e registra no histórico (o banco gera a notificação para "Cadastro atualizado"). */
+/** Observações editáveis na própria ficha (uso de 04-09/11: 18 de 20 edições da Priscila eram só nas observações). Sai na versão de 16/11. */
+const OBS_LIB = 'obs-na-ficha';
+function obsEditavel(d) { return !ehLeitura() && (!ehEscalista() || d.created_by === S.user.id) && libLivre(OBS_LIB); }
+function bindObs(d) {
+  const ta = $('#pv-obs'); if (!ta) return;
+  const acoes = $('#pv-obs-acoes'), orig = d.observations || '';
+  const crescer = () => { ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight + 2, 320) + 'px'; };
+  crescer();
+  ta.oninput = () => { crescer(); acoes.style.display = ta.value.trim() !== orig.trim() ? 'flex' : 'none'; };
+  $('#pv-obs-desfazer').onclick = () => { ta.value = orig; ta.oninput(); };
+  const salvar = async () => {
+    const b = $('#pv-obs-salvar'); b.disabled = true; b.textContent = 'Salvando…';
+    if (await updateDoctor(d, { observations: ta.value.trim() }, 'Cadastro atualizado: observações')) { toast('Observações salvas', 'ok'); await loadDoctorDetail(); drawMedico(); }
+    else { b.disabled = false; b.textContent = 'Salvar observações'; }
+  };
+  $('#pv-obs-salvar').onclick = salvar;
+  ta.onkeydown = (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && acoes.style.display !== 'none') { e.preventDefault(); salvar(); } };
+}
+
 async function updateDoctor(d, patch, description = 'Cadastro atualizado') {
   const { data, error } = await sb.from('flow_doctors').update(patch).eq('id', d.id).select().single();
   if (error) { toast(friendlyDbError(error, 'Erro ao atualizar'), 'err'); return false; }

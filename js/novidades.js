@@ -4,6 +4,12 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
+    id: 15, data: '16/11', titulo: 'Observações direto na ficha', lib: 'obs-na-ficha',
+    itens: [
+      ['Escreva e salve ali mesmo', 'Na ficha do médico, o quadro Observações virou um campo: clique, escreva e salve (ou Ctrl+Enter). Não precisa mais abrir o "Editar cadastro" só para isso.'],
+    ],
+  },
+  {
     id: 14, data: '09/11', titulo: 'Versão de segunda: pedidos da Priscila',
     itens: [
       ['Observações no card', 'No Kanban, as observações do médico aparecem no próprio card (até 3 linhas). Passe o mouse para ler tudo, sem abrir a ficha.'],
@@ -104,24 +110,26 @@ const NOVIDADES = [
     ],
   },
 ];
-const NOV_ULTIMA = NOVIDADES[0].id;
+/** Entrada com `lib` só aparece no dia em que a entrega sai para a equipe (tela Entregas). */
+function novVisiveis() { return NOVIDADES.filter((n) => !n.lib || (typeof libLivre === 'function' && libLivre(n.lib))); }
+function novUltima() { const v = novVisiveis(); return v.length ? v[0].id : 0; }
 const TOUR_URL = 'demo.html';
 
 const Novidades = {
   chave() { return 'flow:novidades:' + String((S.user && S.user.email) || '').toLowerCase(); },
-  vista() { try { return +localStorage.getItem(this.chave()) || 0; } catch (_) { return NOV_ULTIMA; } },
-  marcar() { try { localStorage.setItem(this.chave(), String(NOV_ULTIMA)); } catch (_) { /* sem armazenamento */ } this.ponto(); },
-  ponto() { const p = $('#nov-dot'); if (p) p.hidden = this.vista() >= NOV_ULTIMA; },
+  vista() { try { return +localStorage.getItem(this.chave()) || 0; } catch (_) { return novUltima(); } },
+  marcar() { try { localStorage.setItem(this.chave(), String(novUltima())); } catch (_) { /* sem armazenamento */ } this.ponto(); },
+  ponto() { const p = $('#nov-dot'); if (p) p.hidden = this.vista() >= novUltima(); },
   /** Chamado ao entrar: mostra o que mudou desde a última vez (quem nunca viu, vê só a versão atual). */
   checar() {
     if (window.FLOW_DEMO) return;
     this.ponto();
     const visto = this.vista();
-    if (visto >= NOV_ULTIMA) return;
-    const lista = visto ? NOVIDADES.filter((n) => n.id > visto) : NOVIDADES.slice(0, 1);
+    if (visto >= novUltima()) return;
+    const lista = visto ? novVisiveis().filter((n) => n.id > visto) : novVisiveis().slice(0, 1);
     setTimeout(() => { if (!document.querySelector('.modal-bg')) this.abrir(lista); }, 900);
   },
-  abrir(lista = NOVIDADES) {
+  abrir(lista = novVisiveis()) {
     const m = openModal(`
       <div class="modal-head"><div><h2>Novidades do Flow</h2><div class="om-sub">O que mudou nas últimas versões</div></div><button class="x" data-close>✕</button></div>
       <div class="modal-body">
