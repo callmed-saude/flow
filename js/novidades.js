@@ -4,6 +4,13 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
+    id: 14, data: '09/11', titulo: 'Versão de segunda: pedidos da Priscila',
+    itens: [
+      ['Observações no card', 'No Kanban, as observações do médico aparecem no próprio card (até 3 linhas). Passe o mouse para ler tudo, sem abrir a ficha.'],
+      ['"Cobrar documentos"', 'Na coluna Documentação pendente, a ação agora aparece como "Cobrar documentos", mais curta e fácil de ler no card.'],
+    ],
+  },
+  {
     id: 13, data: '06/11', titulo: 'Versão nova toda segunda, urgente em até 48 horas',
     itens: [
       ['Versão nova às segundas', 'A versão nova do Flow passa a sair toda segunda-feira: de segunda a quarta a gente recolhe as sugestões, na quinta conversa sobre elas e na segunda seguinte entra no sistema.'],

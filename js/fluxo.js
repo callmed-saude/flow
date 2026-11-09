@@ -609,6 +609,7 @@ function cardHtml(d) {
     <div class="top"><span class="sdot s-${sla ? sla.status : 'none'}"></span><span class="nm" title="${esc(d.name)}">${esc(d.name)}</span>${d.priority === 'urgente' ? '<span class="tagx bad">URG</span>' : d.priority === 'hospital_novo' ? '<span class="tagx warn">3h</span>' : ''}${parecerChip(d)}</div>
     <div class="kgrid"><span title="${esc((d.setores || []).join(', '))}">${esc((d.setores || []).join(', ') || '—')}</span><span title="${esc(d.hospital)}">${esc(d.hospital)}</span><span>${esc(d.crm || '—')}</span><span>${esc(d.whatsapp || '—')}</span></div>
     <div class="tags">${d.status_especialidade ? `<span class="tag">${esc(d.status_especialidade)}</span>` : ''}${d.disc ? `<span class="tag ${DISC_CLASS[d.disc]}">${esc(DISC_LABEL[d.disc])}</span>` : ''}${t(d.link_enviado, 'Link')}${t(d.app, 'APP')}${t(d.procuracao, 'Proc.')}</div>
+    ${d.observations ? `<div class="kobs" title="${esc(d.observations)}">${esc(d.observations)}</div>` : ''}
     ${d.doc_pendente ? `<div class="pend" title="${esc(d.doc_pendente)}">${esc(d.doc_pendente)}</div>` : ''}
     ${isOpen(d) ? `<div class="small" style="margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nextInline(d).replace(/^ · /, '')}</div>` : ''}
     <div class="foot"><span class="prog"><i style="width:${prog}%;background:${prog >= 100 ? 'var(--green)' : prog >= 50 ? '#e0a94f' : 'var(--ink-faint)'}"></i></span>${prog}%

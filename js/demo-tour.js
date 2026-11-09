@@ -153,7 +153,7 @@
       say('Cadastro · Camila', 'Falou com a médica? Clica em "Feito" e já agenda a próxima ação.');
       await click(k, () => $('#na-done') || $$('#view-medico button').find((b) => /Feito/.test(b.textContent)));
       await type(k, '#na-res', 'Médica vai mandar os documentos até sexta');
-      await choose(k, '#na-acao', 'Cobrar documentação pendente');
+      await choose(k, '#na-acao', 'Cobrar documentos');
       await click(k, '[data-quick="3"]');
       await click(k, '#na-save');
       say('Cadastro · Camila', 'E move a médica para a próxima etapa.');
