@@ -84,7 +84,6 @@ function renderFluxo() {
   const root = $('#view-fluxo');
   if (!root.dataset.built) {
     root.dataset.built = '1';
-    { const nomes = new Set(S.hospitals.map((h) => h.nome)); const salvo = hospLembrados().filter((h) => nomes.has(h)); if (!F.hospitals.length && salvo.length) F.hospitals = salvo; } // volta com o último filtro de hospital
     root.innerHTML = `
       <div class="op-top">
         <div class="op-filters">
@@ -129,9 +128,9 @@ function renderFluxo() {
 }
 VIEWS.fluxo = renderFluxo;
 
-// ---------- filtro de hospital lembrado + atalhos dos hospitais mais usados (de cada pessoa, neste navegador) ----------
+// ---------- atalhos dos hospitais mais usados (de cada pessoa, neste navegador) ----------
+// o Kanban abre sempre sem filtro (11/11: a Priscila tirava o filtro lembrado em 13 de cada entrada); os atalhos ficam do lado
 const hospChaveLS = (k) => `flow:${k}:` + String((S.user && S.user.email) || '').toLowerCase();
-function hospLembrados() { try { return JSON.parse(localStorage.getItem(hospChaveLS('hospfiltro')) || '[]'); } catch (_) { return []; } }
 function hospUso() { try { return JSON.parse(localStorage.getItem(hospChaveLS('hospuso')) || '{}'); } catch (_) { return {}; } }
 let hospUltimoSalvo = null;
 function salvarHospFiltro() {
@@ -139,7 +138,6 @@ function salvarHospFiltro() {
   if (atual === hospUltimoSalvo) return;
   hospUltimoSalvo = atual;
   try {
-    localStorage.setItem(hospChaveLS('hospfiltro'), atual);
     if (F.hospitals.length === 1) { const u = hospUso(); u[F.hospitals[0]] = (u[F.hospitals[0]] || 0) + 1; localStorage.setItem(hospChaveLS('hospuso'), JSON.stringify(u)); }
   } catch (_) { /* sem armazenamento */ }
 }

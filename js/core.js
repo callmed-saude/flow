@@ -461,6 +461,9 @@ $('#btn-bell').onclick = (e) => {
 };
 document.addEventListener('click', (e) => { if (!e.target.closest('#notif-pop')) $('#notif-pop').hidden = true; });
 
+/** Movimento de rotina do trabalho dos outros ("foi movido para…", "foi atualizado (…)") vai só para o sino; na tela pipoca o que é com a pessoa
+ *  (uso de 09-11/11: a Denise recebeu 37 desses em dois dias). Sai na versão de 16/11 (tela Entregas). */
+function avisoDeRotina(msg) { return typeof libLivre === 'function' && libLivre('avisos-rotina-sino') && /foi movido para "|foi atualizado \(/.test(msg || ''); }
 function subscribeNotifs() {
   if (S.channel) sb.removeChannel(S.channel);
   S.channel = sb.channel('flow-notif-' + S.user.id)
@@ -468,8 +471,9 @@ function subscribeNotifs() {
       S.notifs.unshift(p.new);
       S.notifs = S.notifs.slice(0, 50);
       renderBell();
-      beep();
-      if (p.new.destaque) mostrarRecados(); else toast(p.new.message, '', p.new.created_by_name || 'Usuário');
+      if (p.new.destaque) { beep(); mostrarRecados(); return; }
+      if (avisoDeRotina(p.new.message)) return; // fica só no sino
+      beep(); toast(p.new.message, '', p.new.created_by_name || 'Usuário');
     }).subscribe();
 }
 

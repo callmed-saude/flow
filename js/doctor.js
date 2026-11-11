@@ -24,6 +24,10 @@ function handoffOptions() {
   const opt = (p) => `<option value="${p.user_id}" ${p.user_id === def ? 'selected' : ''}>${esc(p.display_name)}${p.user_id === S.user.id ? ' (eu)' : ''}</option>`;
   return (cad.length ? `<optgroup label="Cadastro">${cad.map(opt).join('')}</optgroup>` : '') + `<optgroup label="${cad.length ? 'Outros' : 'Equipe'}">${outros.map(opt).join('')}</optgroup>`;
 }
+const ND_ULT_LIB = 'novo-medico-lembra', ND_DUP_LIB = 'duplicidade-abrir';
+const ndChave = () => 'flow:nd-ultimo:' + String((S.user && S.user.email) || '').toLowerCase();
+function ndUltimo() { try { return JSON.parse(localStorage.getItem(ndChave()) || '{}'); } catch (_) { return {}; } }
+function ndGuardarUltimo(hosp, setor) { try { localStorage.setItem(ndChave(), JSON.stringify({ hosp, setor })); } catch (_) { /* sem armazenamento */ } }
 function openNewDoctor() {
   const m = openModal(`
     <div class="modal-head"><div><h2>Novo cadastro de médico</h2><div class="om-sub">Campos com * são obrigatórios; o resto o time de Cadastro pode completar depois.</div></div><button class="x" data-close>✕</button></div>
@@ -54,6 +58,13 @@ function openNewDoctor() {
     <div class="modal-foot"><span class="muted small" id="nd-missing" style="margin-right:auto;align-self:center"></span><button class="btn btn-line" data-close>Cancelar</button><button class="btn btn-primary" id="nd-ok" disabled>Cadastrar e encaminhar</button></div>`);
   const el = m.el;
   const hospSel = new Set(), setorSel = new Set(), reasons = {};
+  let veioMarcado = false;
+  if (libLivre(ND_ULT_LIB)) { // já vem com o hospital e o setor do último cadastro (a Carla escolhia ANESTESIA em quase todos)
+    const u = ndUltimo(), ativos = new Set(S.hospitals.filter((h) => h.ativo).map((h) => h.nome));
+    (u.hosp || []).filter((h) => ativos.has(h)).forEach((h) => hospSel.add(h));
+    (u.setor || []).filter((s) => SETORES.includes(s)).forEach((s) => setorSel.add(s));
+    veioMarcado = hospSel.size + setorSel.size > 0;
+  }
 
   const conflictsFor = () => {
     const nm = norm(sanitizeName($('#nd-name', el).value));
@@ -78,8 +89,10 @@ function openNewDoctor() {
     const blocked = [...hospSel].filter((h) => conf[h]);
     $('#nd-conflicts', el).innerHTML = blocked.map((h) => `
       <div class="alert r"><b>Duplicidade detectada por ${esc(conf[h].by)}</b> — ${esc(conf[h].d.name)} · CRM ${esc(conf[h].d.crm || '—')} · ${esc(h)}
+      ${libLivre(ND_DUP_LIB) ? `<div class="nd-dup${libC(ND_DUP_LIB)}"${libD(ND_DUP_LIB)} style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">Já está em <b>${esc(stageLabel(conf[h].d.stage))}</b> · com ${esc(respName(conf[h].d.proximo_responsavel_id))}<button type="button" class="btn btn-line btn-sm" data-abrir-dup="${esc(conf[h].d.id)}">Abrir a ficha</button><span class="muted small">ou escreva o motivo abaixo para cadastrar mesmo assim</span></div>` : ''}
       <textarea class="inp" data-reason="${esc(h)}" maxlength="500" placeholder="Motivo obrigatório (mín. 5 caracteres) — será registrado no histórico do médico" style="margin-top:6px;min-height:50px">${esc(reasons[h] || '')}</textarea></div>`).join('');
     $$('[data-reason]', el).forEach((t) => t.oninput = () => { reasons[t.dataset.reason] = t.value; check(); });
+    $$('[data-abrir-dup]', el).forEach((b) => b.onclick = () => { const d = S.doctors.find((x) => x.id === b.dataset.abrirDup); m.close(); if (d) openDoctor(d); });
     const nNew = [...hospSel].length - blocked.length;
     const sum = $('#nd-summary', el);
     sum.hidden = !hospSel.size;
@@ -102,6 +115,8 @@ function openNewDoctor() {
     i.checked ? setorSel.add(i.value) : setorSel.delete(i.value);
     i.parentElement.classList.toggle('on', i.checked); check();
   });
+  $$('#nd-setores input', el).forEach((i) => { if (setorSel.has(i.value)) { i.checked = true; i.parentElement.classList.add('on'); } });
+  if (veioMarcado) $('.modal-head .om-sub', el).insertAdjacentHTML('beforeend', `<br><span class="${libC(ND_ULT_LIB).trim()}"${libD(ND_ULT_LIB)}>Hospital e setor já vieram marcados como no seu último cadastro: confira antes de salvar.</span>`);
   $('#nd-name', el).onblur = (e) => { e.target.value = sanitizeName(e.target.value); render(); };
   ['#nd-wa', '#nd-name'].forEach((s) => $(s, el).addEventListener('input', check));
   $('#nd-crm', el).addEventListener('input', render);
@@ -152,6 +167,7 @@ function openNewDoctor() {
       }
       created++;
     }
+    if (created) ndGuardarUltimo([...hospSel].filter((h) => !conf[h]), [...setorSel]);
     if (created) toast(base.proximo_responsavel_id === S.user.id ? `${created} cadastro(s) criado(s)!` : `${created} cadastro(s) criado(s) e encaminhado(s) para ${respName(base.proximo_responsavel_id)}`, 'ok');
     if (!failed) m.close(); else btn.disabled = false;
     afterDoctorChange();

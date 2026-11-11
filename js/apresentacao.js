@@ -28,7 +28,7 @@ function renderSobre() {
 
     <h2 class="sb-h">O que a torre entrega</h2>
     <div class="sb-pilares">
-      ${frente('Médicos', ['Kanban por etapa, com filtro de hospital lembrado.', 'Ficha ao lado do Kanban, com "Avançar para…" num clique.', 'Novo médico avisa o que falta e bloqueia cadastro repetido.'])}
+      ${frente('Médicos', ['Kanban por etapa, com atalhos para os hospitais que você mais usa.', 'Ficha ao lado do Kanban, com "Avançar para…" num clique.', 'Novo médico avisa o que falta e bloqueia cadastro repetido.'])}
       ${frente('Hoje', ['Suas ações do dia, atrasadas primeiro.', 'Feito, Amanhã e WhatsApp sem abrir a ficha.'])}
       ${frente('Relatórios', ['Funil, tempo em cada etapa e SLA.', 'Motivos de perda e produtividade da equipe.', 'Exportação para Excel, para auditoria.'])}
     </div>

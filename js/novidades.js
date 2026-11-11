@@ -4,6 +4,20 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
+    id: 17, data: '16/11', titulo: 'Menos cliques no cadastro e menos avisos na tela', lib: 'avisos-rotina-sino',
+    itens: [
+      ['Médico já cadastrado? Abra a ficha', 'No Novo médico, o aviso de duplicidade mostra em que etapa o médico está, com quem, e o botão "Abrir a ficha".'],
+      ['Hospital e setor já marcados', 'O Novo médico vem com o hospital e o setor do seu último cadastro. Confira e troque se for diferente.'],
+      ['Menos avisos pipocando', 'Movimentos de rotina dos colegas ("foi movido para…", "foi atualizado…") ficam só no sino 🔔. Na tela aparece o que é com você.'],
+    ],
+  },
+  {
+    id: 16, data: '11/11', titulo: 'Kanban abre sem filtro',
+    itens: [
+      ['Todos os hospitais ao entrar', 'O Kanban volta a abrir com todos os hospitais. Os atalhos dos hospitais que você mais usa continuam ao lado do filtro, a um clique.'],
+    ],
+  },
+  {
     id: 15, data: '16/11', titulo: 'Observações direto na ficha', lib: 'obs-na-ficha',
     itens: [
       ['Escreva e salve ali mesmo', 'Na ficha do médico, o quadro Observações virou um campo: clique, escreva e salve (ou Ctrl+Enter). Não precisa mais abrir o "Editar cadastro" só para isso.'],
