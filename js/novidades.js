@@ -4,6 +4,14 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
+    id: 18, data: '23/11', titulo: 'Telas mais aproveitadas (nada mudou de lugar)', lib: 'layout-2311',
+    itens: [
+      ['Kanban', 'As colunas usam a largura toda do monitor e os cards mostram só o que está preenchido: cabe mais médico por coluna.'],
+      ['Ficha', 'As Observações aparecem logo abaixo dos números e o contato do médico fica à vista sem rolar. Os botões continuam onde estavam.'],
+      ['Hoje e celular', 'Hoje em duas colunas no monitor; no celular o título do topo aparece inteiro.'],
+    ],
+  },
+  {
     id: 17, data: '16/11', titulo: 'Menos cliques no cadastro e menos avisos na tela', lib: 'avisos-rotina-sino',
     itens: [
       ['Médico já cadastrado? Abra a ficha', 'No Novo médico, o aviso de duplicidade mostra em que etapa o médico está, com quem, e o botão "Abrir a ficha".'],

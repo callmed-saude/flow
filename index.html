@@ -700,6 +700,45 @@
     .view{ padding:14px 12px;}
     .form-grid{ grid-template-columns:1fr;}
   }
+
+  /* ---------- layout de 23/11 (body.lay2; liberado pela tela Entregas, chave layout-2311) ---------- */
+  #lay2-selo{ position:fixed; left:84px; bottom:12px; z-index:70; background:#faf5ff; color:#7e22ce; font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:999px; outline-offset:0 !important;}
+  /* Kanban: colunas esticam no monitor grande; cards mostram só o que está preenchido; texto legível */
+  body.lay2 .kanban-col:not(.closed){ width:auto; flex:1 0 280px;}
+  body.lay2 .kanban-col-head{ position:sticky; top:0; z-index:1; background:var(--surface-3); border-radius:var(--radius-md) var(--radius-md) 0 0;}
+  body.lay2 .kanban-col-body{ gap:6px;}
+  body.lay2 .kcard{ padding:9px 10px;}
+  body.lay2 .kcard .tags .tag.off{ display:none;}
+  body.lay2 .kcard .tags:not(:has(> :not(.off))){ display:none;}
+  body.lay2 .kcard .kgrid{ font-size:12px; gap:0 8px; margin-bottom:4px;}
+  body.lay2 .kcard .foot{ font-size:11.5px; color:var(--ink-soft);}
+  @media (min-width:1600px){
+    body.lay2 .op-top{ flex-direction:row; flex-wrap:wrap; align-items:center; column-gap:16px;}
+    body.lay2 .op-top > .op-filters{ flex:1 1 auto; min-width:0;}
+    body.lay2 .op-top > .op-kpirow{ flex:0 0 auto;}
+    body.lay2 .op-top > #fx-chip, body.lay2 .op-top > .op-filters-more{ flex:1 0 100%;}
+    body.lay2 .kanban-col{ max-height:calc(100vh - 115px);}
+  }
+  /* Ficha: painel um pouco mais estreito; números em uma linha leve; parecer vazio em uma linha */
+  body.lay2 #view-medico.gaveta{ width:clamp(720px, 54vw, 1200px);}
+  body.lay2 .pv-next{ gap:8px 12px;}
+  body.lay2 .person-actions{ margin:10px 0;}
+  body.lay2 .pv-tabs{ margin:12px 0;}
+  body.lay2 .activity-strip{ background:none; box-shadow:none; border:0; padding:0 2px; gap:20px;}
+  body.lay2 .activity-strip .an{ font-size:15px;}
+  .pj-linha{ display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; padding:6px 2px 10px;}
+  .pj-linha .ql{ margin:0;}
+  /* Hoje: duas colunas já a partir de 1200 px; números com rótulo e valor na mesma linha */
+  @media (min-width:1200px){ body.lay2 .hj-list{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 12px;} body.lay2 .hj-list > .hj-row{ margin-bottom:0;} }
+  @media (min-width:2300px){ body.lay2 .hj-list{ grid-template-columns:repeat(3,minmax(0,1fr));} }
+  body.lay2 .hj-kpis .kpi{ padding:10px 14px; display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+  /* Celular: título do topo inteiro e o balão não tampa o fim do texto */
+  @media (max-width:760px){
+    body.lay2 header .brand img{ height:18px;} body.lay2 header .brand{ gap:8px;} body.lay2 .hdr-title{ font-size:13px; padding-left:8px;}
+    body.lay2 header .who > button, body.lay2 header .who > div{ width:32px; min-width:32px;} body.lay2 #hdr-info{ display:none;}
+    body.lay2 .view{ padding-bottom:88px;}
+    #lay2-selo{ left:12px; bottom:68px;}
+  }
 </style>
 </head>
 <body>
@@ -805,19 +844,19 @@
 
 <script>window.FLOW_DEMO = new URLSearchParams(location.search).has('demo');</script>
 <script>window.FLOW_FALHAS = []; window.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'SCRIPT') window.FLOW_FALHAS.push(String(t.src).split('/').pop().split('?')[0]); }, true);</script>
-<script src="config.js?v=20261111170703"></script>
-<script src="js/core.js?v=20261111170703"></script>
-<script src="js/hoje.js?v=20261111170703"></script>
-<script src="js/fluxo.js?v=20261111170703"></script>
-<script src="js/doctor.js?v=20261111170703"></script>
-<script src="js/rqe.js?v=20261111170703"></script>
-<script src="js/reports.js?v=20261111170703"></script>
-<script src="js/sugestoes.js?v=20261111170703"></script>
-<script src="js/entregas.js?v=20261111170703"></script>
-<script src="js/admin.js?v=20261111170703"></script>
-<script src="js/acompanhante.js?v=20261111170703"></script>
-<script src="js/apresentacao.js?v=20261111170703"></script>
-<script src="js/novidades.js?v=20261111170703"></script>
-<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261111170703"><\/script><script src="js/demo-tour.js?v=20261111170703"><\/script>');</script>
+<script src="config.js?v=20261111173006"></script>
+<script src="js/core.js?v=20261111173006"></script>
+<script src="js/hoje.js?v=20261111173006"></script>
+<script src="js/fluxo.js?v=20261111173006"></script>
+<script src="js/doctor.js?v=20261111173006"></script>
+<script src="js/rqe.js?v=20261111173006"></script>
+<script src="js/reports.js?v=20261111173006"></script>
+<script src="js/sugestoes.js?v=20261111173006"></script>
+<script src="js/entregas.js?v=20261111173006"></script>
+<script src="js/admin.js?v=20261111173006"></script>
+<script src="js/acompanhante.js?v=20261111173006"></script>
+<script src="js/apresentacao.js?v=20261111173006"></script>
+<script src="js/novidades.js?v=20261111173006"></script>
+<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261111173006"><\/script><script src="js/demo-tour.js?v=20261111173006"><\/script>');</script>
 </body>
 </html>

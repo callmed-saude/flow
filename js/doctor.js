@@ -325,6 +325,14 @@ function drawMedico() {
   drawResumoTab(body, d);
 }
 
+/** Quadro de Observações (editável a partir de 16/11; no layout de 23/11 fica logo abaixo dos números). */
+function obsBox(d) {
+  return obsEditavel(d) ? `<div class="es-box${libC(OBS_LIB)}"${libD(OBS_LIB)}><div class="ql">Observações${libSoVoce(OBS_LIB) ? ' <span style="color:#7e22ce">🔒 ' + libRot(OBS_LIB) + '</span>' : ''}</div>
+      <textarea class="inp" id="pv-obs" rows="3" placeholder="Anote aqui o andamento com este médico…" style="font-size:13.5px;line-height:1.55;resize:vertical">${esc(d.observations || '')}</textarea>
+      <div id="pv-obs-acoes" style="display:none;gap:8px;margin-top:8px;align-items:center"><button class="btn btn-primary btn-sm" id="pv-obs-salvar">Salvar observações</button><button class="btn-ghost" id="pv-obs-desfazer">Desfazer</button><span class="muted small">Ctrl+Enter salva</span></div></div>`
+    : d.observations ? `<div class="es-box"><div class="ql">Observações</div><div style="font-size:13.5px;line-height:1.55;white-space:pre-wrap">${esc(d.observations)}</div></div>` : '';
+}
+
 function drawResumoTab(body, d) {
   const yn = (b) => (b ? 'Sim' : 'Não');
   const diasFluxo = Math.floor((Date.now() - new Date(d.entry_date)) / 864e5) + 1;
@@ -337,6 +345,7 @@ function drawResumoTab(body, d) {
       <div class="astat"><span class="an">${contatos}</span><span class="al">Contatos / cobranças</span></div>
       ${d.created_by && S.profiles[d.created_by] ? `<div class="astat"><span class="an" style="font-size:1rem">${esc(S.profiles[d.created_by].display_name)}</span><span class="al">Cadastrado por${S.profiles[d.created_by].setor ? ' · ' + esc(SETOR_USUARIO[S.profiles[d.created_by].setor] || S.profiles[d.created_by].setor) : ''}</span></div>` : ''}
     </div>
+    ${layNovo() ? obsBox(d) : ''}
     ${d.stage === 'reprovado' && d.motivo_reprovacao ? `<div class="es-box" style="border-left:3px solid var(--red)"><div class="ql">Motivo da reprovação</div><div style="font-size:13.5px;white-space:pre-wrap">${esc(d.motivo_reprovacao)}</div><div class="hint">Informado por: ${esc(d.reprovacao_origem || '—')}${d.proxima_acao ? ` · pendente: ${esc(d.proxima_acao)} (${esc(respName(d.proximo_responsavel_id))})` : ' · médico já comunicado'}</div></div>` : ''}
     ${parecerBox(d)}
     ${d.doc_pendente ? `<div class="es-box" style="background:var(--amber-soft);border-color:var(--amber-line)"><div class="ql" style="color:var(--amber-ink)">${ic('doc', 14)} Documento pendente</div>${esc(d.doc_pendente)}</div>` : ''}
@@ -354,10 +363,7 @@ function drawResumoTab(body, d) {
         ${d.dt_cobranca_doc ? pvField('Dt. cobrança doc.', esc(d.dt_cobranca_doc)) : ''}${d.dt_email_enviado ? pvField('Dt. e-mail enviado', esc(d.dt_email_enviado)) : ''}${d.dt_resp_hospital ? pvField('Dt. resposta hospital', esc(d.dt_resp_hospital)) : ''}
       </div></details>` : ''}</div>
     </div>
-    ${obsEditavel(d) ? `<div class="es-box${libC(OBS_LIB)}"${libD(OBS_LIB)}><div class="ql">Observações${libSoVoce(OBS_LIB) ? ' <span style="color:#7e22ce">🔒 ' + libRot(OBS_LIB) + '</span>' : ''}</div>
-      <textarea class="inp" id="pv-obs" rows="3" placeholder="Anote aqui o andamento com este médico…" style="font-size:13.5px;line-height:1.55;resize:vertical">${esc(d.observations || '')}</textarea>
-      <div id="pv-obs-acoes" style="display:none;gap:8px;margin-top:8px;align-items:center"><button class="btn btn-primary btn-sm" id="pv-obs-salvar">Salvar observações</button><button class="btn-ghost" id="pv-obs-desfazer">Desfazer</button><span class="muted small">Ctrl+Enter salva</span></div></div>`
-    : d.observations ? `<div class="es-box"><div class="ql">Observações</div><div style="font-size:13.5px;line-height:1.55;white-space:pre-wrap">${esc(d.observations)}</div></div>` : ''}
+    ${layNovo() ? '' : obsBox(d)}
     <div class="es-box"><div class="ql">Outros cadastros deste médico</div>${otherHospitals(d)}</div>`;
   $$('#pv-body [data-other]').forEach((a) => a.onclick = (e) => { e.preventDefault(); openDoctor(S.doctors.find((x) => x.id === a.dataset.other)); });
   bindParecer(d);
@@ -366,6 +372,7 @@ function drawResumoTab(body, d) {
 
 /** Quadro do parecer jurídico: o Jurídico marca; os demais só veem. */
 function parecerBox(d) {
+  if (layNovo() && !d.parecer_juridico && !isJuridico()) return '<div class="pj-linha"><span class="ql">Parecer jurídico</span><span class="muted small">Ainda sem parecer · só o Jurídico registra</span></div>';
   const p = PARECER_JUR[d.parecer_juridico];
   const quem = d.parecer_juridico_por ? (S.profiles[d.parecer_juridico_por]?.display_name || 'Jurídico') : '';
   const atual = p ? `<span class="tagx ${p[1]}">${p[0]}</span>${quem ? ` <span class="muted small">por ${esc(quem)} em ${fmtDate(d.parecer_juridico_em, true)}</span>` : ''}${d.parecer_juridico_obs ? `<div style="margin-top:8px;font-size:13.5px;white-space:pre-wrap">${esc(d.parecer_juridico_obs)}</div>` : ''}`

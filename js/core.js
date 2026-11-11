@@ -483,6 +483,15 @@ const VIEW_TITLES = { sobre: 'Apresentação', hoje: 'Hoje', fluxo: 'Médicos', 
 /** Dica do "i" ao lado do título, por tela (sem dica, o "i" some). */
 /** Escalista (setor Escalas, sem ser administrador): cadastra, move só de Primeiro contato para Aguardando médico e edita só o que criou. O banco garante. */
 /** Acompanhamento (só leitura): vê tudo, exporta e manda sugestões; o banco bloqueia qualquer alteração. */
+/** Layout de 23/11 (conselho de design e produto, 11/11): mais cards por coluna, ficha com os dados à vista. Nenhum botão muda de lugar. */
+function layNovo() { return typeof libLivre === 'function' && libLivre('layout-2311'); }
+function aplicarLayout() {
+  document.body.classList.toggle('lay2', layNovo());
+  let selo = document.getElementById('lay2-selo');
+  const soVoce = typeof libSoVoce === 'function' && libSoVoce('layout-2311');
+  if (soVoce && !selo) { selo = document.createElement('div'); selo.id = 'lay2-selo'; selo.className = 'so-voce'; selo.textContent = '🔒 Layout novo: só você vê · sai 23/11'; document.body.appendChild(selo); }
+  if (selo) selo.hidden = !soVoce;
+}
 function ehLeitura() { return !!(S.profile && S.profile.setor === 'acompanhamento' && !S.isAdmin); }
 function ehEscalista() { return !!(S.profile && S.profile.setor === 'escalas' && !S.isAdmin); }
 const VIEW_INFO = {
@@ -544,7 +553,7 @@ async function startApp() {
   if (typeof F !== 'undefined') F.hospitals = []; if (typeof hospUltimoSalvo !== 'undefined') hospUltimoSalvo = null; // cada pessoa volta com o filtro dela, não com o de quem usou antes
   try { await loadCore(); } catch (err) { toast('Erro ao carregar dados: ' + err.message, 'err'); return; }
   $('#rail-usuarios').hidden = !S.isAdmin;
-  if (typeof libCarrega === 'function') { await libCarrega(); $('#rail-entregas').hidden = !libCapacity(); }
+  if (typeof libCarrega === 'function') { await libCarrega(); $('#rail-entregas').hidden = !libCapacity(); aplicarLayout(); }
   $('#who-email').textContent = S.user.email || '';
   $('#btn-backup').hidden = !S.isAdmin;
   loadNotifs();
