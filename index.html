@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#0018fc">
 <title>CallMed Flow</title>
-<link rel="icon" href="assets/favicon.png">
+<link rel="icon" id="favicon" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500&display=swap">
@@ -739,6 +739,16 @@
     body.lay2 .view{ padding-bottom:88px;}
     #lay2-selo{ left:12px; bottom:68px;}
   }
+
+  /* ---------- logo oficial da CallMed (13/11; liberado pela tela Entregas, chave logo-oficial) ---------- */
+  .gs-logo{ display:none;}
+  body.logo2 .gs-logo{ display:block; height:72px; width:auto; margin-bottom:auto; align-self:flex-start;}
+  body.logo2 .login-card .logo{ height:58px; margin-bottom:22px;}
+  body.logo2 header .brand img{ height:38px;}
+  @media (max-width:760px){ body.logo2 header .brand img, body.logo2.lay2 header .brand img{ height:30px;} }
+  body.logo2 .sb-hero::after{ display:none;}
+  .sb-logo{ position:absolute; right:36px; top:30px; height:76px; width:auto;}
+  @media (max-width:820px){ .sb-logo{ position:static; height:52px; margin-bottom:14px; display:block;} }
 </style>
 </head>
 <body>
@@ -747,7 +757,7 @@
 <div id="login-screen" class="gate gate-split" hidden>
   <div class="gs-form">
     <div class="login-card">
-      <img class="logo" src="assets/logo-azul.png" alt="CallMed">
+      <img class="logo" src="assets/logo-azul.png" data-logo="logo-callmed.png" alt="CallMed">
       <h1>Entrar no Flow</h1>
       <div class="sub">Credenciamento de médicos. Acesso restrito à equipe CallMed.</div>
       <form id="login-form">
@@ -760,6 +770,7 @@
     </div>
   </div>
   <div class="gs-side">
+    <img class="gs-logo" src="assets/logo-callmed-fundo-escuro.png" alt="" aria-hidden="true">
     <span class="gs-k">CallMed Flow</span>
     <p class="gs-quote">Cada médico, em cada hospital, da primeira mensagem à aprovação.</p>
   </div>
@@ -768,7 +779,7 @@
 <!-- definir nova senha (link de e-mail ou troca obrigatória) -->
 <div id="pass-screen" class="gate" hidden>
   <div class="login-card">
-    <img class="logo" src="assets/logo-azul.png" alt="CallMed">
+    <img class="logo" src="assets/logo-azul.png" data-logo="logo-callmed.png" alt="CallMed">
     <h1>Defina sua senha</h1>
     <div class="sub" id="pass-sub">Por segurança, defina uma nova senha para continuar.</div>
     <form id="pass-form">
@@ -783,7 +794,7 @@
 <!-- sem acesso -->
 <div id="noaccess-screen" class="gate" hidden>
   <div class="login-card">
-    <img class="logo" src="assets/logo-azul.png" alt="CallMed">
+    <img class="logo" src="assets/logo-azul.png" data-logo="logo-callmed.png" alt="CallMed">
     <h1>Sem acesso ao Flow</h1>
     <div class="sub">Sua conta (<b id="noaccess-email"></b>) existe, mas ainda não foi liberada no CallMed Flow. Peça a um administrador para liberar seu acesso.</div>
     <button class="btn btn-line btn-block" id="btn-noaccess-out">Sair</button>
@@ -793,7 +804,7 @@
 <div id="app">
   <header>
     <div class="brand">
-      <img src="assets/logo-azul.png" alt="CallMed">
+      <img src="assets/logo-azul.png" data-logo="logo-callmed.png" alt="CallMed">
       <span class="hdr-title" id="hdr-title">Fluxo</span><span class="hdr-sub" id="hdr-sub">Credenciamento de médicos</span><span class="info-ico" id="hdr-info" tabindex="0" title="Cada card é um médico em um hospital. A Jornada mostra dia a dia em que etapa do credenciamento ele esteve; o Kanban serve para mover de etapa arrastando. Clique no nome para abrir a ficha completa.">i</span>
     </div>
     <div class="who">
@@ -844,19 +855,19 @@
 
 <script>window.FLOW_DEMO = new URLSearchParams(location.search).has('demo');</script>
 <script>window.FLOW_FALHAS = []; window.addEventListener('error', function (e) { var t = e.target; if (t && t.tagName === 'SCRIPT') window.FLOW_FALHAS.push(String(t.src).split('/').pop().split('?')[0]); }, true);</script>
-<script src="config.js?v=20261111173006"></script>
-<script src="js/core.js?v=20261111173006"></script>
-<script src="js/hoje.js?v=20261111173006"></script>
-<script src="js/fluxo.js?v=20261111173006"></script>
-<script src="js/doctor.js?v=20261111173006"></script>
-<script src="js/rqe.js?v=20261111173006"></script>
-<script src="js/reports.js?v=20261111173006"></script>
-<script src="js/sugestoes.js?v=20261111173006"></script>
-<script src="js/entregas.js?v=20261111173006"></script>
-<script src="js/admin.js?v=20261111173006"></script>
-<script src="js/acompanhante.js?v=20261111173006"></script>
-<script src="js/apresentacao.js?v=20261111173006"></script>
-<script src="js/novidades.js?v=20261111173006"></script>
-<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261111173006"><\/script><script src="js/demo-tour.js?v=20261111173006"><\/script>');</script>
+<script src="config.js?v=20261113114012"></script>
+<script src="js/core.js?v=20261113114012"></script>
+<script src="js/hoje.js?v=20261113114012"></script>
+<script src="js/fluxo.js?v=20261113114012"></script>
+<script src="js/doctor.js?v=20261113114012"></script>
+<script src="js/rqe.js?v=20261113114012"></script>
+<script src="js/reports.js?v=20261113114012"></script>
+<script src="js/sugestoes.js?v=20261113114012"></script>
+<script src="js/entregas.js?v=20261113114012"></script>
+<script src="js/admin.js?v=20261113114012"></script>
+<script src="js/acompanhante.js?v=20261113114012"></script>
+<script src="js/apresentacao.js?v=20261113114012"></script>
+<script src="js/novidades.js?v=20261113114012"></script>
+<script>if (window.FLOW_DEMO) document.write('<script src="js/demo.js?v=20261113114012"><\/script><script src="js/demo-tour.js?v=20261113114012"><\/script>');</script>
 </body>
 </html>

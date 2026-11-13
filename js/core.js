@@ -492,6 +492,19 @@ function aplicarLayout() {
   if (soVoce && !selo) { selo = document.createElement('div'); selo.id = 'lay2-selo'; selo.className = 'so-voce'; selo.textContent = '🔒 Layout novo: só você vê · sai 23/11'; document.body.appendChild(selo); }
   if (selo) selo.hidden = !soVoce;
 }
+/** Logo oficial da CallMed (enviado pelo Luiz em 13/11). Antes do login vale a data; depois, a tela Entregas (só a Capacity Case vê antes). */
+const LOGO_OFICIAL_EM = '2026-11-16';
+function logoOficial() {
+  const h = new Date(), hoje = `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`;
+  return hoje >= LOGO_OFICIAL_EM || (typeof libCapacity === 'function' && S.user && libCapacity());
+}
+function aplicarLogo() {
+  const on = logoOficial();
+  document.body.classList.toggle('logo2', on);
+  document.querySelectorAll('img[data-logo]').forEach((i) => { i.src = 'assets/' + (on ? i.dataset.logo : 'logo-azul.png'); });
+  const f = document.getElementById('favicon'); if (f) f.href = 'assets/' + (on ? 'favicon-callmed.png' : 'favicon.png');
+}
+aplicarLogo();
 function ehLeitura() { return !!(S.profile && S.profile.setor === 'acompanhamento' && !S.isAdmin); }
 function ehEscalista() { return !!(S.profile && S.profile.setor === 'escalas' && !S.isAdmin); }
 const VIEW_INFO = {
@@ -553,7 +566,7 @@ async function startApp() {
   if (typeof F !== 'undefined') F.hospitals = []; if (typeof hospUltimoSalvo !== 'undefined') hospUltimoSalvo = null; // cada pessoa volta com o filtro dela, não com o de quem usou antes
   try { await loadCore(); } catch (err) { toast('Erro ao carregar dados: ' + err.message, 'err'); return; }
   $('#rail-usuarios').hidden = !S.isAdmin;
-  if (typeof libCarrega === 'function') { await libCarrega(); $('#rail-entregas').hidden = !libCapacity(); aplicarLayout(); }
+  if (typeof libCarrega === 'function') { await libCarrega(); $('#rail-entregas').hidden = !libCapacity(); aplicarLayout(); aplicarLogo(); }
   $('#who-email').textContent = S.user.email || '';
   $('#btn-backup').hidden = !S.isAdmin;
   loadNotifs();

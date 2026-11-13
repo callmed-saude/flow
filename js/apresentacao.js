@@ -13,6 +13,7 @@ function renderSobre() {
   const prio = (n, t, d, tag, ok) => `<div class="sb-prio-l"><span class="sb-prio-n">${n}</span><div><b>${t}</b><p>${d}</p></div><span class="sb-tag ${ok ? 'ok' : ''}">${tag}</span></div>`;
   $('#view-sobre').innerHTML = `<div class="sb">
     <div class="sb-hero">
+      ${document.body.classList.contains('logo2') ? '<img class="sb-logo" src="assets/logo-callmed-fundo-escuro.png" alt="CallMed">' : ''}
       <div class="sb-kick">Torre de Controle - CallMed · Credenciamento</div>
       <h1>Cada médico, em cada hospital, com a etapa, o prazo e a próxima ação à vista.</h1>
       <p>O Flow junta numa tela só o que antes ficava espalhado entre planilha, WhatsApp e o sistema antigo: quem é o médico, em que etapa está, o que falta e quem cuida.</p>

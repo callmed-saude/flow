@@ -16,6 +16,7 @@ const NOVIDADES = [
     itens: [
       ['Médico já cadastrado? Abra a ficha', 'No Novo médico, o aviso de duplicidade mostra em que etapa o médico está, com quem, e o botão "Abrir a ficha".'],
       ['Hospital e setor já marcados', 'O Novo médico vem com o hospital e o setor do seu último cadastro. Confira e troque se for diferente.'],
+      ['Logo oficial da CallMed', 'O Flow passa a usar o logo oficial da CallMed, com o balão, no topo, no login e na Apresentação.'],
       ['Menos avisos pipocando', 'Movimentos de rotina dos colegas ("foi movido para…", "foi atualizado…") ficam só no sino 🔔. Na tela aparece o que é com você.'],
     ],
   },

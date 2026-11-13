@@ -292,7 +292,7 @@
     if (!cursor) build();
     const ov = document.createElement('div');
     ov.className = 'dm-start';
-    ov.innerHTML = `<div class="card"><img src="assets/logo-azul.png" alt="CallMed" style="height:24px;margin-bottom:18px">
+    ov.innerHTML = `<div class="card"><img src="assets/${typeof logoOficial === 'function' && logoOficial() ? 'logo-callmed.png' : 'logo-azul.png'}" alt="CallMed" style="height:${typeof logoOficial === 'function' && logoOficial() ? 48 : 24}px;margin-bottom:18px">
       <h1>Como usar o CallMed Flow</h1>
       <p>Uma demonstração de 3 minutos no sistema de verdade, com dados fictícios. Você pode pausar, voltar e avançar quando quiser.</p>
       <ol><li>A escalista cadastra e encaminha um médico</li><li>O Cadastro recebe o aviso, entra em contato e confere os documentos</li><li>O médico avança pelas etapas até a aprovação</li><li>A gestão acompanha na Jornada, nos Indicadores e nos Relatórios</li></ol>
