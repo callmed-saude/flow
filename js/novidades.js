@@ -4,7 +4,7 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
-    id: 18, data: '23/11', titulo: 'Telas mais aproveitadas (nada mudou de lugar)', lib: 'layout-2311',
+    id: 18, data: '18/11', titulo: 'Telas mais aproveitadas (nada mudou de lugar)', lib: 'layout-2311',
     itens: [
       ['Kanban', 'As colunas usam a largura toda do monitor e os cards mostram só o que está preenchido: cabe mais médico por coluna.'],
       ['Ficha', 'As Observações aparecem logo abaixo dos números e o contato do médico fica à vista sem rolar. Os botões continuam onde estavam.'],
