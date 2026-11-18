@@ -9,6 +9,7 @@ const NOVIDADES = [
       ['Kanban', 'As colunas usam a largura toda do monitor e os cards mostram só o que está preenchido: cabe mais médico por coluna.'],
       ['Ficha', 'As Observações aparecem logo abaixo dos números e o contato do médico fica à vista sem rolar. Os botões continuam onde estavam.'],
       ['Hoje e celular', 'Hoje em duas colunas no monitor; no celular o título do topo aparece inteiro.'],
+      ['Busca mais rápida', 'Na busca do Kanban, Enter abre o médico quando só um aparece, e Esc limpa a busca.'],
     ],
   },
   {

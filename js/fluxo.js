@@ -109,6 +109,17 @@ function renderFluxo() {
       <div id="fx-body"></div>`;
     let t;
     $('#f-search').oninput = (e) => { clearTimeout(t); t = setTimeout(() => { F.search = e.target.value; refreshFluxo(); }, 180); };
+    // atalhos da busca (sai em 23/11): Enter abre o médico quando só um aparece; Esc limpa a busca (a Priscila tirou o filtro 58 vezes em 3 dias)
+    $('#f-search').onkeydown = (e) => {
+      if (typeof libLivre !== 'function' || !libLivre('busca-atalhos')) return;
+      if (e.key === 'Enter') {
+        clearTimeout(t); F.search = e.target.value; refreshFluxo();
+        const achados = filteredDoctors();
+        if (achados.length === 1) { e.preventDefault(); openDoctor(achados[0]); }
+      } else if (e.key === 'Escape' && e.target.value) {
+        e.preventDefault(); e.stopPropagation(); clearTimeout(t); e.target.value = ''; F.search = ''; refreshFluxo();
+      }
+    };
     $('#f-toggle').onclick = () => { FX.filtersOpen = !FX.filtersOpen; $('#fx-more').classList.toggle('open', FX.filtersOpen); };
     $$('#fx-mode button').forEach((b) => b.onclick = () => {
       FX.mode = b.dataset.mode;
