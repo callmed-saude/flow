@@ -551,11 +551,20 @@ async function updateDoctor(d, patch, description = 'Cadastro atualizado') {
 }
 
 function replicate(d) {
+  // hospitais onde o mesmo médico (mesmo nome ou CRM) já tem cadastro: aparecem marcados e não deixam replicar (16/11: Carla e Priscila bateram no bloqueio do banco)
+  const nm = norm(d.name), crm = digits(d.crm);
+  const jaTem = {};
+  S.doctors.forEach((x) => { if (x.id !== d.id && (norm(x.name) === nm || (crm.length >= 3 && digits(x.crm) === crm))) jaTem[x.hospital] = x; });
+  const opcoes = S.hospitals.filter((h) => h.ativo && h.nome !== d.hospital);
+  const livres = opcoes.filter((h) => !jaTem[h.nome]);
   const m = openModal(`
     <div class="modal-head"><div><h2>Replicar cadastro</h2><div class="om-sub">${esc(d.name)}</div></div><button class="x" data-close>✕</button></div>
     <div class="modal-body"><p style="margin-top:0">Será criado um novo cadastro de <b>${esc(d.name)}</b> em outro hospital, mantendo os dados pessoais. O fluxo recomeça em "${esc(stageLabel('aguardando_contato'))}".</p>
-      <div class="field"><label>Novo hospital</label><select class="inp" id="rp-h"><option value="">Selecione…</option>${S.hospitals.filter((h) => h.ativo && h.nome !== d.hospital).map((h) => `<option>${esc(h.nome)}</option>`).join('')}</select></div></div>
+      <div class="field"><label>Novo hospital</label><select class="inp" id="rp-h"><option value="">Selecione…</option>${livres.map((h) => `<option>${esc(h.nome)}</option>`).join('')}${opcoes.filter((h) => jaTem[h.nome]).map((h) => `<option disabled>${esc(h.nome)} — já cadastrado (${esc(stageLabel(jaTem[h.nome].stage))})</option>`).join('')}</select></div>
+      ${Object.keys(jaTem).length ? `<div class="hint">Já cadastrado em: ${Object.entries(jaTem).map(([h, x]) => `<a href="#" data-rp-abrir="${esc(x.id)}">${esc(h)}</a>`).join(' · ')}</div>` : ''}</div>
     <div class="modal-foot"><button class="btn btn-line" data-close>Cancelar</button><button class="btn btn-primary" id="rp-ok">Replicar</button></div>`, { size: 'sm' });
+  $$('[data-rp-abrir]', m.el).forEach((l) => l.onclick = (e) => { e.preventDefault(); const x = S.doctors.find((y) => y.id === l.dataset.rpAbrir); m.close(); if (x) openDoctor(x); });
+  if (!livres.length) { $('#rp-ok', m.el).disabled = true; $('#rp-h', m.el).insertAdjacentHTML('afterend', '<div class="hint">Este médico já está cadastrado em todos os hospitais ativos.</div>'); }
   $('#rp-ok', m.el).onclick = async () => {
     const h = $('#rp-h', m.el).value;
     if (!h) return toast('Escolha o hospital.', 'err');
