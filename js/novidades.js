@@ -4,6 +4,12 @@
 /** Mais recente primeiro. `id` só cresce; a pessoa vê as versões com id maior que a última que ela já viu. */
 const NOVIDADES = [
   {
+    id: 19, data: '23/11', titulo: 'Editar cadastro já abre nas Observações', lib: 'editar-foco-obs',
+    itens: [
+      ['Direto ao ponto', 'Ao clicar em "Editar cadastro", o cursor já vai para o campo Observações: escreva e clique em Salvar. Os outros campos continuam lá, é só rolar.'],
+    ],
+  },
+  {
     id: 18, data: '18/11', titulo: 'Telas mais aproveitadas (nada mudou de lugar)', lib: 'layout-2311',
     itens: [
       ['Kanban', 'As colunas usam a largura toda do monitor e os cards mostram só o que está preenchido: cabe mais médico por coluna.'],

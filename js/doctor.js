@@ -59,11 +59,11 @@ function openNewDoctor() {
   const el = m.el;
   const hospSel = new Set(), setorSel = new Set(), reasons = {};
   let veioMarcado = false;
-  if (libLivre(ND_ULT_LIB)) { // já vem com o hospital e o setor do último cadastro (a Carla escolhia ANESTESIA em quase todos)
-    const u = ndUltimo(), ativos = new Set(S.hospitals.filter((h) => h.ativo).map((h) => h.nome));
-    (u.hosp || []).filter((h) => ativos.has(h)).forEach((h) => hospSel.add(h));
+  if (libLivre(ND_ULT_LIB)) { // já vem com o setor do último cadastro (a Carla escolhia ANESTESIA em quase todos); o hospital fica em branco,
+    // porque muda quase sempre e, pré-marcado, podia levar a cadastro no hospital errado (uso de 19/11)
+    const u = ndUltimo();
     (u.setor || []).filter((s) => SETORES.includes(s)).forEach((s) => setorSel.add(s));
-    veioMarcado = hospSel.size + setorSel.size > 0;
+    veioMarcado = setorSel.size > 0;
   }
 
   const conflictsFor = () => {
@@ -116,7 +116,7 @@ function openNewDoctor() {
     i.parentElement.classList.toggle('on', i.checked); check();
   });
   $$('#nd-setores input', el).forEach((i) => { if (setorSel.has(i.value)) { i.checked = true; i.parentElement.classList.add('on'); } });
-  if (veioMarcado) $('.modal-head .om-sub', el).insertAdjacentHTML('beforeend', `<br><span class="${libC(ND_ULT_LIB).trim()}"${libD(ND_ULT_LIB)}>Hospital e setor já vieram marcados como no seu último cadastro: confira antes de salvar.</span>`);
+  if (veioMarcado) $('.modal-head .om-sub', el).insertAdjacentHTML('beforeend', `<br><span class="${libC(ND_ULT_LIB).trim()}"${libD(ND_ULT_LIB)}>O setor já veio marcado como no seu último cadastro: confira antes de salvar.</span>`);
   $('#nd-name', el).onblur = (e) => { e.target.value = sanitizeName(e.target.value); render(); };
   ['#nd-wa', '#nd-name'].forEach((s) => $(s, el).addEventListener('input', check));
   $('#nd-crm', el).addEventListener('input', render);
@@ -498,6 +498,9 @@ function editDoctorDialog(d) {
     <div class="modal-foot"><button class="btn btn-line" data-close>Cancelar</button><button class="btn btn-primary" id="ed-save">Salvar</button></div>`, { size: 'lg' });
   const el = m.el;
   $$('#ed-setores input', el).forEach((c) => c.onchange = () => c.parentElement.classList.toggle('on', c.checked));
+  if (libLivre('editar-foco-obs')) { // a Priscila usa o Editar cadastro quase só para as observações (23 de 23 em 19/11): o cursor já vai para lá
+    setTimeout(() => { const t = $('#ed-obs', el); if (!t) return; t.scrollIntoView({ block: 'center' }); t.focus(); t.setSelectionRange(t.value.length, t.value.length); }, 60);
+  }
   $('#ed-name', el).onblur = (e) => { e.target.value = sanitizeName(e.target.value); };
   $('#ed-save', el).onclick = async () => {
     const patch = {
