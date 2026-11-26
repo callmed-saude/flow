@@ -539,7 +539,18 @@ async function reloadAll(silent) {
   if (!silent && typeof ACTS !== 'undefined') ACTS = null; // recarregar na mão busca também o histórico na hora
   btn.disabled = true;
   try {
-    await loadCore();
+    try { await loadCore(); }
+    catch (err) {
+      // aba aberta de um dia para o outro (26/11): sem internet ao acordar o computador, ou com a sessão vencida, que chega ao banco sem login
+      const msg = String(err && (err.message || err));
+      const semRede = /Failed to fetch|NetworkError|Load failed/i.test(msg) || !navigator.onLine;
+      const semSessao = err && (err.code === '42501' || err.code === 'PGRST301' || /permission denied|JWT/i.test(msg));
+      if (semRede && silent) { btn.disabled = false; return; } // em silêncio: tenta de novo na próxima rodada, sem aviso
+      if (!semSessao) throw err;
+      const { data } = await sb.auth.refreshSession();
+      if (!data || !data.session) { toast('Sua sessão expirou. Entre de novo para continuar.', 'err'); setTimeout(() => location.reload(), 2500); return; }
+      await loadCore();
+    }
     VIEWS[currentView] && VIEWS[currentView]();
     // a ficha aberta passa a apontar para o cadastro recarregado (senão mostraria "Cadastro não encontrado" e gravaria no objeto velho)
     if (typeof PV !== 'undefined' && PV.doctor) {
